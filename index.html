@@ -19,6 +19,7 @@
       background: var(--paper);
     }
     * { box-sizing: border-box; }
+    [hidden] { display: none !important; }
     body { margin: 0; }
     .wrap { width: min(1120px, calc(100% - 48px)); margin-inline: auto; }
     .top { background: var(--white); border-bottom: 3px solid var(--gold); }
@@ -51,6 +52,11 @@
     .sale summary { cursor: pointer; font-weight: 700; margin-bottom: 12px; }
     .sale-results { margin-top: 20px; }
     .sale-results h3 { font-size: 17px; margin-bottom: 0; }
+    .journal { margin-top: 22px; border-top: 1px solid var(--line); padding-top: 16px; }
+    .journal label { display: block; font-size: 14px; font-weight: 700; margin-bottom: 6px; }
+    .journal button { margin-top: 10px; padding: 10px 13px; font: inherit; font-weight: 700; color: #fff; background: #292720; border: 1px solid #292720; border-radius: 4px; cursor: pointer; }
+    .journal button:disabled { opacity: .55; cursor: default; }
+    .journal textarea { margin-top: 8px; width: 100%; }
     .with-unit { display: flex; }
     input, select {
       display: block; min-width: 0; width: 100%; min-height: 45px;
@@ -196,18 +202,32 @@
               <p class="hint" id="credit-hint">Если отсрочка указана в рабочих днях, введите число рабочих дней по договору.</p>
             </fieldset>
             <details class="sale">
-              <summary>Цена продажи и прибыль</summary>
+              <summary>Маржа и цена для клиента</summary>
               <div class="fields">
-                <div class="field">
-                  <label for="sale-price">Цена продажи без отсрочки</label>
+                <div class="field field-full">
+                  <label for="sale-mode">Как задать цену продажи</label>
+                  <select id="sale-mode" aria-describedby="sale-hint">
+                    <option value="price">Указать готовую цену</option>
+                    <option value="markup">Добавить маржу в рублях за единицу</option>
+                    <option value="margin">Задать маржу в процентах от цены продажи</option>
+                  </select>
+                  <p class="hint" id="sale-hint">Цена включает доставку. Стоимость отсрочки прибавляется отдельно.</p>
+                </div>
+                <div id="sale-unit-field" class="field">
+                  <label id="sale-input-label" for="sale-price">Цена продажи без отсрочки</label>
                   <div class="with-unit">
                     <input id="sale-price" inputmode="decimal" autocomplete="off">
+                    <input id="markup-value" inputmode="decimal" autocomplete="off" hidden>
                     <select id="sale-unit" aria-label="Единица цены продажи">
                       <option value="t">₽/т</option>
                       <option value="kg">₽/кг</option>
                       <option value="l">₽/л</option>
                     </select>
                   </div>
+                </div>
+                <div id="margin-percent-field" class="field" hidden>
+                  <label for="margin-percent">Маржа от цены продажи, %</label>
+                  <input id="margin-percent" inputmode="decimal" autocomplete="off">
                 </div>
                 <div class="field">
                   <label for="vat-rate">НДС в суммах, %</label>
@@ -243,15 +263,29 @@
             <p id="conversion-note" class="hint"></p>
             <section id="sale-results" class="sale-results" hidden aria-labelledby="sale-heading">
               <h3 id="sale-heading">Цена для клиента и прибыль</h3>
+              <table aria-label="Цена продажи и маржа за единицу">
+                <thead><tr><th scope="col">Единица</th><th scope="col">Без отсрочки</th><th scope="col">С отсрочкой</th><th scope="col">Маржа</th></tr></thead>
+                <tbody>
+                  <tr><th scope="row">₽/л</th><td id="sale-before-l">—</td><td id="sale-after-l">—</td><td id="sale-margin-l">—</td></tr>
+                  <tr><th scope="row">₽/кг</th><td id="sale-before-kg">—</td><td id="sale-after-kg">—</td><td id="sale-margin-kg">—</td></tr>
+                  <tr><th scope="row">₽/т</th><td id="sale-before-t">—</td><td id="sale-after-t">—</td><td id="sale-margin-t">—</td></tr>
+                </tbody>
+              </table>
               <dl class="breakdown">
-                <div><dt>Цена продажи без отсрочки</dt><dd id="sale-unit-before">—</dd></div>
-                <div><dt>Цена продажи с отсрочкой</dt><dd id="sale-unit-after">—</dd></div>
+                <div><dt>Сумма продажи без отсрочки</dt><dd id="sale-total-before">—</dd></div>
                 <div><dt>Сумма продажи с отсрочкой</dt><dd id="sale-total">—</dd></div>
                 <div><dt>Прибыль за рейс без НДС</dt><dd id="sale-profit">—</dd></div>
-                <div><dt>Прибыль от суммы продажи, %</dt><dd id="sale-margin">—</dd></div>
+                <div><dt>Маржа без отсрочки, %</dt><dd id="sale-margin">—</dd></div>
               </dl>
             </section>
           </div>
+          <section class="journal" aria-labelledby="journal-label">
+            <label id="journal-label" for="journal-reference">Клиент или маршрут для журнала</label>
+            <input id="journal-reference" type="text" autocomplete="off">
+            <button type="button" id="copy-journal">Скопировать строку для Google Таблиц</button>
+            <p class="hint" id="journal-status" role="status">Вставьте строку в колонку A первой свободной строки журнала.</p>
+            <textarea id="journal-row" aria-label="Строка для журнала" rows="2" readonly hidden></textarea>
+          </section>
         </section>
       </div>
     </div>
@@ -260,12 +294,15 @@
     'use strict';
     const byId = id => document.getElementById(id);
     const units = ['t', 'kg', 'l'];
-    const unitLabels = {t: '₽/т', kg: '₽/кг', l: '₽/л'};
+    const unitLabels = {t: 'т', kg: 'кг', l: 'л'};
+    const saleLabels = {price: 'Готовая цена', markup: 'Маржа в рублях', margin: 'Маржа в процентах'};
     const creditInputs = {kg: 'credit-kg', l: 'credit-l', annual: 'credit-rate'};
+    const creditLabels = {kg: '₽/кг в день', l: '₽/л в день', annual: '% годовых'};
     const numericFields = [
       'distance', 'rate', 'freight-fixed', 'quantity', 'price', 'density',
-      'credit-days', ...Object.values(creditInputs), 'sale-price', 'vat-rate'
+      'credit-days', ...Object.values(creditInputs), 'sale-price', 'markup-value', 'margin-percent', 'vat-rate'
     ];
+    let journalValues = [];
     const formatter = new Intl.NumberFormat('ru-RU', {
       minimumFractionDigits: 2,
       maximumFractionDigits: 2
@@ -340,14 +377,26 @@
         invalid.add(creditInput);
         messages.push('Укажите ставку отсрочки. Для беспроцентной отсрочки введите 0.');
       }
-      const saleEntered = byId('sale-price').value.trim() !== '';
+      const saleMode = byId('sale-mode').value;
+      const percentMode = saleMode === 'margin';
+      const markupMode = saleMode === 'markup';
+      const saleInput = percentMode ? 'margin-percent' : markupMode ? 'markup-value' : 'sale-price';
+      byId('sale-unit-field').hidden = percentMode;
+      byId('sale-price').hidden = markupMode;
+      byId('markup-value').hidden = !markupMode;
+      byId('margin-percent-field').hidden = !percentMode;
+      const saleLabel = byId('sale-input-label');
+      saleLabel.htmlFor = saleInput;
+      saleLabel.textContent = markupMode ? 'Маржа за единицу' : 'Цена продажи без отсрочки';
+      const saleEntered = byId(saleInput).value.trim() !== '';
       const saleUnit = byId('sale-unit').value;
-      const salePrice = inputs['sale-price'];
+      const saleValue = inputs[saleInput];
+      const validSale = Number.isFinite(saleValue) && (!percentMode || saleValue < 100);
       const vatRate = byId('vat-rate').value.trim() ? inputs['vat-rate'] : 0;
       const needsCreditConversion = !annual && creditDays > 0 && creditRate > 0
         && (quantityUnit === 'l') !== (creditMode === 'l');
       const needsPurchaseConversion = (quantityUnit === 'l') !== (priceUnit === 'l');
-      const needsSaleConversion = saleEntered && (quantityUnit === 'l') !== (saleUnit === 'l');
+      const needsSaleConversion = saleEntered && !percentMode && (quantityUnit === 'l') !== (saleUnit === 'l');
       if (byId('density').value.trim() && !validDensity) {
         invalid.add('density');
         messages.push('Укажите плотность больше нуля.');
@@ -355,9 +404,9 @@
         invalid.add('density');
         messages.push('Для перевода между литрами и массой укажите плотность топлива.');
       }
-      if (saleEntered && !Number.isFinite(salePrice)) {
-        invalid.add('sale-price');
-        messages.push('Проверьте цену продажи.');
+      if (saleEntered && !validSale) {
+        invalid.add(saleInput);
+        messages.push(percentMode ? 'Укажите маржу от 0 до 100%, не включая 100%.' : 'Проверьте введённую цену или маржу.');
       }
       if (saleEntered && !Number.isFinite(vatRate)) {
         invalid.add('vat-rate');
@@ -383,27 +432,78 @@
         showAmount('total-' + unit, amount > 0 ? total / amount : NaN);
       }
       byId('sale-results').hidden = !saleEntered;
+      const saleAmount = load[saleUnit];
+      let saleBefore = NaN;
+      if (saleEntered && validSale && quantity > 0) {
+        if (percentMode) saleBefore = subtotal / (1 - saleValue / 100);
+        else if (markupMode) saleBefore = subtotal + saleValue * saleAmount;
+        else saleBefore = saleValue * saleAmount;
+      }
+      const saleTotal = saleBefore + creditCost;
+      const profit = saleBefore - subtotal;
+      const netProfit = profit / (1 + vatRate / 100);
+      const margin = saleBefore > 0 ? profit / saleBefore * 100 : NaN;
       if (saleEntered) {
-        const saleAmount = load[saleUnit];
-        const saleTotal = saleAmount > 0 ? salePrice * saleAmount + creditCost : NaN;
-        const profit = saleTotal - total;
-        showAmount('sale-unit-before', salePrice, ' ' + unitLabels[saleUnit]);
-        showAmount('sale-unit-after', saleAmount > 0 ? salePrice + creditCost / saleAmount : NaN, ' ' + unitLabels[saleUnit]);
+        for (const unit of units) {
+          const amount = load[unit] > 0 ? load[unit] : NaN;
+          showAmount('sale-before-' + unit, saleBefore / amount);
+          showAmount('sale-after-' + unit, saleTotal / amount);
+          showAmount('sale-margin-' + unit, profit / amount);
+        }
+        showAmount('sale-total-before', saleBefore, ' ₽');
         showAmount('sale-total', saleTotal, ' ₽');
-        showAmount('sale-profit', profit / (1 + vatRate / 100), ' ₽');
-        showAmount('sale-margin', saleTotal > 0 ? profit / saleTotal * 100 : NaN, ' %');
+        showAmount('sale-profit', netProfit, ' ₽');
+        showAmount('sale-margin', margin, ' %');
       }
       byId('conversion-note').textContent = !validDensity && !invalid.has('density')
         ? (quantityUnit === 'l'
           ? 'Для расчёта за тонну и килограмм укажите плотность.'
           : 'Для расчёта за литр укажите плотность.')
         : '';
+      journalValues = [
+        quantity, unitLabels[quantityUnit], density, price, '₽/' + unitLabels[priceUnit],
+        fixedFreight ? 'Готовая сумма' : 'По пробегу', fixedFreight ? '' : distance, fixedFreight ? '' : rate,
+        fuel, freight, creditDays, creditLabels[creditMode], creditRate,
+        annual ? (byId('credit-base').value === 'fuel' ? 'Топливо' : 'Топливо и доставка') : '',
+        creditCost, subtotal, total, saleEntered ? saleLabels[saleMode] : '', saleValue,
+        saleEntered ? (percentMode ? '%' : '₽/' + unitLabels[saleUnit]) : '',
+        saleEntered ? vatRate : '', saleBefore, saleTotal,
+        saleBefore / load.l, saleTotal / load.l, saleBefore / load.kg, saleTotal / load.kg,
+        saleBefore / load.t, saleTotal / load.t, netProfit, margin
+      ];
+      byId('copy-journal').disabled = invalid.size > 0 || !Number.isFinite(total)
+        || (saleEntered && !Number.isFinite(saleTotal));
+    }
+
+    const journalNumber = new Intl.NumberFormat('ru-RU', {useGrouping: false, maximumFractionDigits: 8});
+    const journalDate = new Intl.DateTimeFormat('ru-RU', {
+      dateStyle: 'short', timeStyle: 'short', timeZone: 'Europe/Moscow'
+    });
+    const journalHint = 'Вставьте строку в колонку A первой свободной строки журнала.';
+    async function copyJournalRow() {
+      const name = byId('journal-reference').value.replace(/[\t\r\n]/g, ' ').trim();
+      const safeName = /^[=+@\-]/.test(name) ? "'" + name : name;
+      const row = byId('journal-row');
+      row.value = [journalDate.format(new Date()), safeName, ...journalValues.map(value =>
+        typeof value !== 'number' ? value : Number.isFinite(value) ? journalNumber.format(value) : ''
+      )].join('\t');
+      const status = byId('journal-status');
+      try {
+        await navigator.clipboard.writeText(row.value);
+        row.hidden = true;
+        status.textContent = 'Строка скопирована. ' + journalHint;
+      } catch {
+        row.hidden = false;
+        row.select();
+        status.textContent = 'Нажмите Ctrl+C. ' + journalHint;
+      }
     }
 
     const form = byId('calculator');
     form.addEventListener('submit', event => event.preventDefault());
     form.addEventListener('input', calculate);
     form.addEventListener('change', calculate);
+    byId('copy-journal').addEventListener('click', copyJournalRow);
     calculate();
   </script>
 </body>
