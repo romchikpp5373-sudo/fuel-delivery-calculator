@@ -46,6 +46,11 @@
     .field-full { grid-column: 1 / -1; }
     .credit { margin: 22px 0 0; padding: 16px 0 0; border: 0; border-top: 1px solid var(--line); min-width: 0; }
     .credit legend { padding-right: 10px; font-size: 16px; font-weight: 700; }
+    .credit label { line-height: 1.25; }
+    .sale { margin-top: 20px; }
+    .sale summary { cursor: pointer; font-weight: 700; margin-bottom: 12px; }
+    .sale-results { margin-top: 20px; }
+    .sale-results h3 { font-size: 17px; margin-bottom: 0; }
     .with-unit { display: flex; }
     input, select {
       display: block; min-width: 0; width: 100%; min-height: 45px;
@@ -106,13 +111,24 @@
           <h2 id="input-heading">Данные для расчёта</h2>
           <form id="calculator" novalidate>
             <div class="fields">
-              <div class="field">
+              <div class="field field-full">
+                <label for="freight-mode">Как посчитать доставку</label>
+                <select id="freight-mode">
+                  <option value="distance">По пробегу и тарифу</option>
+                  <option value="fixed">Готовая сумма за рейс</option>
+                </select>
+              </div>
+              <div id="distance-field" class="field">
                 <label for="distance">Оплачиваемый пробег, км</label>
                 <input id="distance" inputmode="decimal" autocomplete="off" value="100">
               </div>
-              <div class="field">
+              <div id="rate-field" class="field">
                 <label for="rate">Тариф перевозки, ₽/км</label>
                 <input id="rate" inputmode="decimal" autocomplete="off" value="100">
+              </div>
+              <div id="freight-fixed-field" class="field field-full" hidden>
+                <label for="freight-fixed">Стоимость доставки за рейс, ₽</label>
+                <input id="freight-fixed" inputmode="decimal" autocomplete="off" placeholder="Введите сумму">
               </div>
               <div class="field">
                 <label for="quantity">Загрузка машины</label>
@@ -145,24 +161,61 @@
             <fieldset class="credit">
               <legend>Отсрочка платежа</legend>
               <div class="fields">
+                <div class="field field-full">
+                  <label for="credit-mode">Как начислять отсрочку</label>
+                  <select id="credit-mode" aria-describedby="credit-hint">
+                    <option value="kg">Дневная ставка за килограмм</option>
+                    <option value="l">Дневная ставка за литр</option>
+                    <option value="annual">Процент годовых</option>
+                  </select>
+                </div>
                 <div class="field">
-                  <label for="credit-days">Срок, календарные дни</label>
+                  <label id="credit-days-label" for="credit-days">Оплачиваемые дни</label>
                   <input id="credit-days" inputmode="numeric" autocomplete="off" value="0">
                 </div>
-                <div class="field">
-                  <label for="credit-rate">Ставка, % годовых</label>
-                  <input id="credit-rate" inputmode="decimal" autocomplete="off" placeholder="0">
+                <div id="credit-kg-field" class="field">
+                  <label for="credit-kg">Ставка, ₽/кг в день</label>
+                  <input id="credit-kg" inputmode="decimal" autocomplete="off">
                 </div>
-                <div class="field field-full">
+                <div id="credit-l-field" class="field" hidden>
+                  <label for="credit-l">Ставка, ₽/л в день</label>
+                  <input id="credit-l" inputmode="decimal" autocomplete="off">
+                </div>
+                <div id="credit-rate-field" class="field" hidden>
+                  <label for="credit-rate">Ставка, % годовых</label>
+                  <input id="credit-rate" inputmode="decimal" autocomplete="off">
+                </div>
+                <div id="credit-base-field" class="field field-full" hidden>
                   <label for="credit-base">На какую сумму начислять</label>
-                  <select id="credit-base" aria-describedby="credit-hint">
+                  <select id="credit-base">
                     <option value="all">Топливо и доставка</option>
                     <option value="fuel">Только топливо</option>
                   </select>
-                  <p class="hint" id="credit-hint">Стоимость отсрочки = сумма × ставка / 100 × дни / 365.</p>
                 </div>
               </div>
+              <p class="hint" id="credit-hint">Если отсрочка указана в рабочих днях, введите число рабочих дней по договору.</p>
             </fieldset>
+            <details class="sale">
+              <summary>Цена продажи и прибыль</summary>
+              <div class="fields">
+                <div class="field">
+                  <label for="sale-price">Цена продажи без отсрочки</label>
+                  <div class="with-unit">
+                    <input id="sale-price" inputmode="decimal" autocomplete="off">
+                    <select id="sale-unit" aria-label="Единица цены продажи">
+                      <option value="t">₽/т</option>
+                      <option value="kg">₽/кг</option>
+                      <option value="l">₽/л</option>
+                    </select>
+                  </div>
+                </div>
+                <div class="field">
+                  <label for="vat-rate">НДС в суммах, %</label>
+                  <input id="vat-rate" inputmode="decimal" autocomplete="off" aria-describedby="vat-hint" value="0">
+                </div>
+              </div>
+              <p class="hint" id="vat-hint">Укажите общую ставку, если продажа и все расходы включают одинаковый НДС. Для сумм без НДС оставьте 0.</p>
+            </details>
             <p id="error" class="error" role="alert" hidden></p>
           </form>
         </section>
@@ -170,23 +223,34 @@
           <h2 id="result-heading">Стоимость поставки</h2>
           <div aria-live="polite" aria-atomic="true">
             <dl class="summary">
-              <dt>Итого за всю загрузку</dt>
+              <dt>Себестоимость рейса с отсрочкой</dt>
               <dd id="total">—</dd>
             </dl>
             <dl class="breakdown">
               <div><dt>Топливо</dt><dd id="fuel">—</dd></div>
               <div><dt>Доставка за рейс</dt><dd id="freight">—</dd></div>
+              <div><dt>Себестоимость без отсрочки</dt><dd id="subtotal">—</dd></div>
               <div><dt>Стоимость отсрочки</dt><dd id="credit-cost">—</dd></div>
             </dl>
             <table>
-              <thead><tr><th scope="col">Единица</th><th scope="col">Доставка</th><th scope="col">Итоговая цена</th></tr></thead>
+              <thead><tr><th scope="col">Единица</th><th scope="col">Доставка</th><th scope="col">Без отсрочки</th><th scope="col">С отсрочкой</th></tr></thead>
               <tbody>
-                <tr><th scope="row">₽/т</th><td id="freight-t">—</td><td id="total-t">—</td></tr>
-                <tr><th scope="row">₽/кг</th><td id="freight-kg">—</td><td id="total-kg">—</td></tr>
-                <tr><th scope="row">₽/л</th><td id="freight-l">—</td><td id="total-l">—</td></tr>
+                <tr><th scope="row">₽/т</th><td id="freight-t">—</td><td id="subtotal-t">—</td><td id="total-t">—</td></tr>
+                <tr><th scope="row">₽/кг</th><td id="freight-kg">—</td><td id="subtotal-kg">—</td><td id="total-kg">—</td></tr>
+                <tr><th scope="row">₽/л</th><td id="freight-l">—</td><td id="subtotal-l">—</td><td id="total-l">—</td></tr>
               </tbody>
             </table>
             <p id="conversion-note" class="hint"></p>
+            <section id="sale-results" class="sale-results" hidden aria-labelledby="sale-heading">
+              <h3 id="sale-heading">Цена для клиента и прибыль</h3>
+              <dl class="breakdown">
+                <div><dt>Цена продажи без отсрочки</dt><dd id="sale-unit-before">—</dd></div>
+                <div><dt>Цена продажи с отсрочкой</dt><dd id="sale-unit-after">—</dd></div>
+                <div><dt>Сумма продажи с отсрочкой</dt><dd id="sale-total">—</dd></div>
+                <div><dt>Прибыль за рейс без НДС</dt><dd id="sale-profit">—</dd></div>
+                <div><dt>Прибыль от суммы продажи, %</dt><dd id="sale-margin">—</dd></div>
+              </dl>
+            </section>
           </div>
         </section>
       </div>
@@ -195,9 +259,13 @@
   <script>
     'use strict';
     const byId = id => document.getElementById(id);
-    const fields = ['distance', 'rate', 'quantity', 'price', 'density'];
-    const creditFields = ['credit-days', 'credit-rate'];
     const units = ['t', 'kg', 'l'];
+    const unitLabels = {t: '₽/т', kg: '₽/кг', l: '₽/л'};
+    const creditInputs = {kg: 'credit-kg', l: 'credit-l', annual: 'credit-rate'};
+    const numericFields = [
+      'distance', 'rate', 'freight-fixed', 'quantity', 'price', 'density',
+      'credit-days', ...Object.values(creditInputs), 'sale-price', 'vat-rate'
+    ];
     const formatter = new Intl.NumberFormat('ru-RU', {
       minimumFractionDigits: 2,
       maximumFractionDigits: 2
@@ -222,30 +290,46 @@
     }
 
     function calculate() {
-      const [distance, rate, quantity, price, density] = fields.map(id => parseNumber(byId(id).value));
+      const inputs = Object.fromEntries(numericFields.map(id => [id, parseNumber(byId(id).value)]));
+      const {distance, rate, quantity, price, density} = inputs;
       const quantityUnit = byId('quantity-unit').value;
       const priceUnit = byId('price-unit').value;
       const validDensity = Number.isFinite(density) && density > 0;
       const load = unitsPerLoad(quantity, quantityUnit, validDensity ? density : NaN);
-      const freightOk = Number.isFinite(distance * rate);
-      const freight = freightOk ? distance * rate : NaN;
+      const fixedFreight = byId('freight-mode').value === 'fixed';
+      byId('distance-field').hidden = fixedFreight;
+      byId('rate-field').hidden = fixedFreight;
+      byId('freight-fixed-field').hidden = !fixedFreight;
+      const freight = fixedFreight ? inputs['freight-fixed'] : distance * rate;
       const fuel = Number.isFinite(price) && quantity > 0 ? load[priceUnit] * price : NaN;
       const subtotal = freight + fuel;
-      const [creditDaysInput, creditRateInput] = creditFields.map(id => byId(id).value.trim());
-      const creditDays = parseNumber(creditDaysInput || '0');
-      const creditRate = parseNumber(creditRateInput || '0');
+      const creditMode = byId('credit-mode').value;
+      const annual = creditMode === 'annual';
+      const creditInput = creditInputs[creditMode];
+      for (const id of Object.values(creditInputs)) byId(id + '-field').hidden = id !== creditInput;
+      byId('credit-base-field').hidden = !annual;
+      byId('credit-days-label').textContent = annual ? 'Календарные дни' : 'Оплачиваемые дни';
+      byId('credit-hint').textContent = annual
+        ? 'Сумма × ставка / 100 × дни / 365.'
+        : 'Ставка × количество × дни. Если в договоре указаны рабочие дни, введите их количество.';
+      const creditDays = byId('credit-days').value.trim() ? inputs['credit-days'] : 0;
+      const creditRate = byId(creditInput).value.trim() ? inputs[creditInput] : 0;
       const validCreditDays = Number.isSafeInteger(creditDays);
-      const validCreditRate = Number.isFinite(creditRate) && (!(creditDays > 0) || creditRateInput !== '');
+      const validCreditRate = Number.isFinite(creditRate) && (!(creditDays > 0) || byId(creditInput).value.trim() !== '');
       const creditBase = byId('credit-base').value === 'fuel' ? fuel : subtotal;
-      const creditCost = validCreditDays && validCreditRate
-        ? (creditDays === 0 || creditRate === 0 ? 0 : creditBase * (creditRate / 100) * (creditDays / 365))
-        : NaN;
+      let creditCost = NaN;
+      if (validCreditDays && validCreditRate) {
+        if (creditDays === 0 || creditRate === 0) creditCost = 0;
+        else if (annual) creditCost = creditBase * (creditRate / 100) * (creditDays / 365);
+        else if (quantity > 0) creditCost = load[creditMode] * creditRate * creditDays;
+      }
       const total = subtotal + creditCost;
 
       const invalid = new Set();
       const messages = [];
-      for (const [id, value] of Object.entries({distance, rate, quantity, price})) {
-        if (!Number.isFinite(value) || (id === 'quantity' && value <= 0)) invalid.add(id);
+      const freightInputs = fixedFreight ? ['freight-fixed'] : ['distance', 'rate'];
+      for (const id of [...freightInputs, 'quantity', 'price']) {
+        if (!Number.isFinite(inputs[id]) || (id === 'quantity' && quantity <= 0)) invalid.add(id);
       }
       if (invalid.size) messages.push('Проверьте выделенные поля. Загрузка должна быть больше нуля.');
       if (!validCreditDays) {
@@ -253,18 +337,34 @@
         messages.push('Укажите срок отсрочки целым числом дней.');
       }
       if (!validCreditRate) {
-        invalid.add('credit-rate');
-        messages.push('Укажите годовую ставку отсрочки. Для беспроцентной отсрочки введите 0.');
+        invalid.add(creditInput);
+        messages.push('Укажите ставку отсрочки. Для беспроцентной отсрочки введите 0.');
       }
+      const saleEntered = byId('sale-price').value.trim() !== '';
+      const saleUnit = byId('sale-unit').value;
+      const salePrice = inputs['sale-price'];
+      const vatRate = byId('vat-rate').value.trim() ? inputs['vat-rate'] : 0;
+      const needsCreditConversion = !annual && creditDays > 0 && creditRate > 0
+        && (quantityUnit === 'l') !== (creditMode === 'l');
+      const needsPurchaseConversion = (quantityUnit === 'l') !== (priceUnit === 'l');
+      const needsSaleConversion = saleEntered && (quantityUnit === 'l') !== (saleUnit === 'l');
       if (byId('density').value.trim() && !validDensity) {
         invalid.add('density');
         messages.push('Укажите плотность больше нуля.');
-      } else if (quantityUnit !== priceUnit && (quantityUnit === 'l' || priceUnit === 'l') && !validDensity) {
+      } else if (!validDensity && (needsCreditConversion || needsPurchaseConversion || needsSaleConversion)) {
         invalid.add('density');
-        messages.push('Для пересчёта закупочной цены по другой единице нужна плотность топлива.');
+        messages.push('Для перевода между литрами и массой укажите плотность топлива.');
+      }
+      if (saleEntered && !Number.isFinite(salePrice)) {
+        invalid.add('sale-price');
+        messages.push('Проверьте цену продажи.');
+      }
+      if (saleEntered && !Number.isFinite(vatRate)) {
+        invalid.add('vat-rate');
+        messages.push('Проверьте ставку НДС.');
       }
       if (!invalid.size && !Number.isFinite(total)) messages.push('Значения слишком велики для расчёта.');
-      for (const id of [...fields, ...creditFields]) {
+      for (const id of numericFields) {
         if (invalid.has(id)) byId(id).setAttribute('aria-invalid', 'true');
         else byId(id).removeAttribute('aria-invalid');
       }
@@ -274,11 +374,24 @@
       showAmount('freight', freight, ' ₽');
       showAmount('fuel', fuel, ' ₽');
       showAmount('credit-cost', creditCost, ' ₽');
+      showAmount('subtotal', subtotal, ' ₽');
       showAmount('total', total, ' ₽');
       for (const unit of units) {
         const amount = load[unit];
         showAmount('freight-' + unit, amount > 0 ? freight / amount : NaN);
+        showAmount('subtotal-' + unit, amount > 0 ? subtotal / amount : NaN);
         showAmount('total-' + unit, amount > 0 ? total / amount : NaN);
+      }
+      byId('sale-results').hidden = !saleEntered;
+      if (saleEntered) {
+        const saleAmount = load[saleUnit];
+        const saleTotal = saleAmount > 0 ? salePrice * saleAmount + creditCost : NaN;
+        const profit = saleTotal - total;
+        showAmount('sale-unit-before', salePrice, ' ' + unitLabels[saleUnit]);
+        showAmount('sale-unit-after', saleAmount > 0 ? salePrice + creditCost / saleAmount : NaN, ' ' + unitLabels[saleUnit]);
+        showAmount('sale-total', saleTotal, ' ₽');
+        showAmount('sale-profit', profit / (1 + vatRate / 100), ' ₽');
+        showAmount('sale-margin', saleTotal > 0 ? profit / saleTotal * 100 : NaN, ' %');
       }
       byId('conversion-note').textContent = !validDensity && !invalid.has('density')
         ? (quantityUnit === 'l'
