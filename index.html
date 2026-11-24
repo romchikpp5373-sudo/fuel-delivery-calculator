@@ -57,6 +57,31 @@
     .journal button { margin-top: 10px; padding: 10px 13px; font: inherit; font-weight: 700; color: #fff; background: #292720; border: 1px solid #292720; border-radius: 4px; cursor: pointer; }
     .journal button:disabled { opacity: .55; cursor: default; }
     .journal textarea { margin-top: 8px; width: 100%; }
+    .quote-panel { margin-top: 22px; }
+    .quote-panel summary { cursor: pointer; font: 700 23px Ubuntu, "Trebuchet MS", Arial, sans-serif; }
+    .quote-panel form { margin-top: 20px; }
+    .quote-actions { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 15px; }
+    .quote-actions button { padding: 10px 13px; font: inherit; font-weight: 700; color: white; background: #292720; border: 1px solid #292720; border-radius: 4px; cursor: pointer; }
+    .quote-actions button:disabled { opacity: .55; cursor: default; }
+    .quote-sheet { display: none; }
+    .quote-sheet.preview { display: block; max-width: 760px; margin: 24px auto 0; padding: clamp(16px, 4vw, 38px); background: white; border: 1px solid var(--line); }
+    .quote-sheet img { display: block; width: min(255px, 100%); margin-bottom: 18px; }
+    .quote-sheet h2 { margin-bottom: 10px; }
+    .quote-sheet p { margin-top: 8px; line-height: 1.5; overflow-wrap: anywhere; }
+    .quote-sheet table { margin-top: 18px; }
+    .quote-sheet table th, .quote-sheet table td { padding: 9px 5px; }
+    .quote-sheet td:last-child { font-weight: 700; }
+    .quote-sheet .quote-date { color: var(--muted); }
+    .quote-sheet .quote-notes { white-space: pre-wrap; }
+    #quote-notes { width: 100%; padding: 8px 10px; font: inherit; border: 1px solid #bcb4a3; border-radius: 4px; }
+    @media print {
+      @page { size: A4; margin: 16mm; }
+      body:has(.quote-panel[open] .quote-sheet.preview), body:has(.quote-panel[open] .quote-sheet.preview) main { margin: 0; padding: 0; background: white; color: black; }
+      body:has(.quote-panel[open] .quote-sheet.preview) :is(.top, .hero, .panels, .quote-panel > summary, .quote-panel > form) { display: none !important; }
+      body:has(.quote-panel[open] .quote-sheet.preview) :is(.calculator, .quote-panel) { width: auto; margin: 0; padding: 0; border: 0; box-shadow: none; }
+      .quote-sheet.preview { width: auto; max-width: none; margin: 0; padding: 0; border: 0; }
+      .quote-sheet table { break-inside: avoid; }
+    }
     .with-unit { display: flex; }
     input, select {
       display: block; min-width: 0; width: 100%; min-height: 45px;
@@ -288,6 +313,92 @@
           </section>
         </section>
       </div>
+      <details class="panel quote-panel">
+        <summary>Коммерческое предложение</summary>
+        <form id="quote-form" novalidate>
+          <div class="fields">
+            <div class="field">
+              <label for="quote-client">Клиент</label>
+              <input id="quote-client" type="text" maxlength="180" required>
+            </div>
+            <div class="field">
+              <label for="quote-fuel">Топливо и марка</label>
+              <input id="quote-fuel" type="text" maxlength="180" required>
+            </div>
+            <div class="field field-full">
+              <label for="quote-delivery">Адрес или условия поставки</label>
+              <input id="quote-delivery" type="text" maxlength="280">
+            </div>
+            <div class="field">
+              <label for="quote-delivery-date">Дата поставки</label>
+              <input id="quote-delivery-date" type="date">
+            </div>
+            <div class="field">
+              <label for="quote-valid-date">КП действует до</label>
+              <input id="quote-valid-date" type="date">
+            </div>
+            <div class="field">
+              <label for="quote-unit">Единица цены и объёма в КП</label>
+              <select id="quote-unit">
+                <option value="load">Как в поле «Загрузка машины»</option>
+                <option value="t">Тонна</option>
+                <option value="kg">Килограмм</option>
+                <option value="l">Литр</option>
+              </select>
+            </div>
+            <div class="field">
+              <label for="quote-vat">НДС в цене для клиента</label>
+              <select id="quote-vat">
+                <option value="">Не указывать</option>
+                <option value="included">НДС включён</option>
+                <option value="excluded">Без НДС</option>
+              </select>
+            </div>
+            <div class="field" id="quote-days-field" hidden>
+              <label for="quote-days-kind">Как указать дни отсрочки в КП</label>
+              <select id="quote-days-kind">
+                <option value="working">Рабочие</option>
+                <option value="calendar">Календарные</option>
+              </select>
+            </div>
+            <div class="field field-full">
+              <label for="quote-contact">Контакт для клиента</label>
+              <input id="quote-contact" type="text" maxlength="210">
+            </div>
+            <div class="field field-full">
+              <label for="quote-notes">Дополнительные условия</label>
+              <textarea id="quote-notes" rows="2" maxlength="700"></textarea>
+            </div>
+          </div>
+          <p class="hint" id="quote-hint">Укажите цену продажи или маржу в разделе «Маржа и цена для клиента».</p>
+          <div class="quote-actions">
+            <button type="button" id="quote-preview-button">Показать КП</button>
+            <button type="button" id="quote-print" disabled>Печать / сохранить PDF</button>
+          </div>
+          <p class="error" id="quote-error" role="alert" hidden></p>
+        </form>
+        <article id="quote-sheet" class="quote-sheet" aria-labelledby="quote-title">
+          <img id="quote-logo" alt="ЦТР — Центр Топливных Решений">
+          <h2 id="quote-title">Коммерческое предложение</h2>
+          <p class="quote-date" id="quote-issued"></p>
+          <p><strong id="quote-client-out"></strong></p>
+          <p><strong id="quote-fuel-out"></strong></p>
+          <p id="quote-quantity-out"></p>
+          <p id="quote-delivery-out" hidden></p>
+          <p id="quote-delivery-date-out" hidden></p>
+          <p id="quote-valid-date-out" hidden></p>
+          <table>
+            <thead><tr><th scope="col">Условия оплаты</th><th scope="col" id="quote-price-title">Цена</th><th scope="col">Сумма, ₽</th></tr></thead>
+            <tbody>
+              <tr><th scope="row">100% предоплата</th><td id="quote-cash-price"></td><td id="quote-cash-total"></td></tr>
+              <tr id="quote-deferred-row" hidden><th scope="row" id="quote-deferred-title"></th><td id="quote-deferred-price"></td><td id="quote-deferred-total"></td></tr>
+            </tbody>
+          </table>
+          <p id="quote-vat-out" hidden></p>
+          <p id="quote-notes-out" class="quote-notes" hidden></p>
+          <p id="quote-contact-out" hidden></p>
+        </article>
+      </details>
     </div>
   </main>
   <script>
@@ -303,6 +414,8 @@
       'credit-days', ...Object.values(creditInputs), 'sale-price', 'markup-value', 'margin-percent', 'vat-rate'
     ];
     let journalValues = [];
+    let quotePrices;
+    let quoteRequested = false;
     const formatter = new Intl.NumberFormat('ru-RU', {
       minimumFractionDigits: 2,
       maximumFractionDigits: 2
@@ -473,6 +586,12 @@
       ];
       byId('copy-journal').disabled = invalid.size > 0 || !Number.isFinite(total)
         || (saleEntered && !Number.isFinite(saleTotal));
+      quotePrices = {load, quantityUnit, saleBefore, saleTotal, creditDays, annual};
+      byId('quote-days-field').hidden = annual || !(creditDays > 0);
+      byId('quote-hint').textContent = Number.isFinite(saleBefore)
+        ? 'Итог в КП считается по цене за единицу, округлённой до копеек.'
+        : 'Укажите цену продажи или маржу в разделе «Маржа и цена для клиента».';
+      if (quoteRequested) updateQuote();
     }
 
     const journalNumber = new Intl.NumberFormat('ru-RU', {useGrouping: false, maximumFractionDigits: 8});
@@ -499,11 +618,93 @@
       }
     }
 
+    const quoteDay = new Intl.DateTimeFormat('ru-RU', {dateStyle: 'long', timeZone: 'Europe/Moscow'});
+    const quoteQuantity = new Intl.NumberFormat('ru-RU', {maximumFractionDigits: 6});
+    const quotePlural = new Intl.PluralRules('ru-RU');
+
+    function quoteDate(value) {
+      return value ? quoteDay.format(new Date(value + 'T12:00:00Z')) : '';
+    }
+
+    function quoteTerm(days, calendar) {
+      const plural = quotePlural.select(days);
+      const adjective = calendar ? 'календарн' : 'рабоч';
+      const ending = plural === 'one' ? (calendar ? 'ый день' : 'ий день')
+        : plural === 'few' ? (calendar ? 'ых дня' : 'их дня')
+        : calendar ? 'ых дней' : 'их дней';
+      return 'Отсрочка на ' + days + ' ' + adjective + ending;
+    }
+
+    function optionalQuoteLine(id, prefix, text) {
+      const field = byId(id);
+      field.hidden = !text;
+      field.textContent = text ? prefix + text : '';
+    }
+
+    function updateQuote() {
+      const {load, quantityUnit, saleBefore, saleTotal, creditDays, annual} = quotePrices;
+      const choice = byId('quote-unit').value;
+      const unit = choice === 'load' ? quantityUnit : choice;
+      const amount = load[unit];
+      const volume = Number.isFinite(amount) ? Number(amount.toFixed(6)) : NaN;
+      const client = byId('quote-client').value.trim();
+      const fuel = byId('quote-fuel').value.trim();
+      const deferred = creditDays > 0;
+      let error = '';
+      if (!Number.isFinite(saleBefore)) error = 'Укажите цену продажи или маржу и проверьте данные расчёта.';
+      else if (!Number.isFinite(saleTotal)) error = 'Проверьте ставку и срок отсрочки.';
+      else if (!(volume > 0)) error = 'Укажите плотность для пересчёта или выберите единицу загрузки.';
+      else if (!client || !fuel) error = 'Укажите клиента и марку топлива.';
+
+      const sheet = byId('quote-sheet');
+      byId('quote-print').disabled = Boolean(error);
+      byId('quote-error').hidden = !error;
+      byId('quote-error').textContent = error;
+      sheet.classList.toggle('preview', !error);
+      if (error) return false;
+
+      byId('quote-client-out').textContent = client;
+      byId('quote-fuel-out').textContent = fuel;
+      byId('quote-issued').textContent = quoteDay.format(new Date());
+      byId('quote-quantity-out').textContent = 'Объём — ' + quoteQuantity.format(volume) + ' ' + unitLabels[unit];
+      byId('quote-price-title').textContent = 'Цена, ₽/' + unitLabels[unit];
+      const cashPrice = Number((saleBefore / amount).toFixed(2));
+      showAmount('quote-cash-price', cashPrice);
+      showAmount('quote-cash-total', cashPrice * volume);
+      byId('quote-deferred-row').hidden = !deferred;
+      if (deferred) {
+        const deferredPrice = Number((saleTotal / amount).toFixed(2));
+        byId('quote-deferred-title').textContent = quoteTerm(creditDays, annual || byId('quote-days-kind').value === 'calendar');
+        showAmount('quote-deferred-price', deferredPrice);
+        showAmount('quote-deferred-total', deferredPrice * volume);
+      }
+      optionalQuoteLine('quote-delivery-out', 'Поставка — ', byId('quote-delivery').value.trim());
+      optionalQuoteLine('quote-delivery-date-out', 'Дата поставки — ', quoteDate(byId('quote-delivery-date').value));
+      optionalQuoteLine('quote-valid-date-out', 'КП действует до ', quoteDate(byId('quote-valid-date').value));
+      const vat = byId('quote-vat').value;
+      optionalQuoteLine('quote-vat-out', '', {included: 'НДС включён в цену.', excluded: 'Цена без НДС.'}[vat]);
+      optionalQuoteLine('quote-notes-out', '', byId('quote-notes').value.trim());
+      optionalQuoteLine('quote-contact-out', 'Контакт — ', byId('quote-contact').value.trim());
+      return true;
+    }
+
+    function previewQuote() {
+      quoteRequested = true;
+      if (updateQuote()) byId('quote-sheet').scrollIntoView({block: 'nearest'});
+    }
+
     const form = byId('calculator');
     form.addEventListener('submit', event => event.preventDefault());
     form.addEventListener('input', calculate);
     form.addEventListener('change', calculate);
     byId('copy-journal').addEventListener('click', copyJournalRow);
+    const quoteForm = byId('quote-form');
+    quoteForm.addEventListener('submit', event => { event.preventDefault(); previewQuote(); });
+    quoteForm.addEventListener('input', () => { if (quoteRequested) updateQuote(); });
+    quoteForm.addEventListener('change', () => { if (quoteRequested) updateQuote(); });
+    byId('quote-preview-button').addEventListener('click', previewQuote);
+    byId('quote-print').addEventListener('click', () => { if (updateQuote()) window.print(); });
+    byId('quote-logo').src = document.querySelector('.brand img').src;
     calculate();
   </script>
 </body>
