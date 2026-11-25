@@ -75,7 +75,11 @@
     .quote-sheet td:last-child { font-weight: 700; }
     .quote-sheet .quote-date { color: var(--muted); }
     .quote-sheet .quote-notes { white-space: pre-wrap; }
-    #quote-notes { width: 100%; padding: 8px 10px; font: inherit; border: 1px solid #bcb4a3; border-radius: 4px; }
+    .quote-panel textarea { width: 100%; padding: 8px 10px; font: inherit; border: 1px solid #bcb4a3; border-radius: 4px; resize: vertical; }
+    .quote-panel .quote-bank-label { display: flex; align-items: center; gap: 9px; min-height: 44px; margin: 0; cursor: pointer; }
+    #quote-include-bank { display: inline-block; min-height: auto; width: 18px; height: 18px; margin: 0; flex: none; accent-color: var(--ink); }
+    .quote-requisites { margin-top: 18px; padding-top: 12px; border-top: 1px solid var(--line); break-inside: avoid; }
+    .quote-requisites h3 { margin: 0; font-size: 16px; }
     @media print {
       @page { size: A4; margin: 16mm; }
       body:has(.quote-panel[open] .quote-sheet.preview), body:has(.quote-panel[open] .quote-sheet.preview) main { margin: 0; padding: 0; background: white; color: black; }
@@ -185,6 +189,40 @@
           <h2 id="input-heading">Данные для расчёта</h2>
           <form id="calculator" novalidate>
             <div class="fields">
+              <div class="field field-full">
+                <label for="fuel-type">Вид топлива</label>
+                <select id="fuel-type">
+                  <option value="">Выберите топливо</option>
+                  <optgroup label="Дизельное топливо">
+                    <option>ДТ-Л-К5 — летнее</option>
+                    <option>ДТ сорта C</option>
+                    <option>ДТ сорта E — межсезонное</option>
+                    <option>ДТ сорта F</option>
+                    <option>ДТ-З-К5, класс 0</option>
+                    <option>ДТ-З-К5, класс 1</option>
+                    <option>ДТ-З-К5, класс 2</option>
+                    <option>ДТ-З-32</option>
+                    <option>ДТ-А-К5 — арктическое</option>
+                  </optgroup>
+                  <optgroup label="Бензин">
+                    <option>АИ-92</option>
+                    <option>АИ-95</option>
+                    <option>АИ-98</option>
+                    <option>АИ-100</option>
+                  </optgroup>
+                  <optgroup label="Другие нефтепродукты">
+                    <option>ТС-1 — керосин</option>
+                    <option>Газойль</option>
+                    <option>Мазут</option>
+                    <option>Пропан-бутан</option>
+                  </optgroup>
+                  <option value="custom">Другой вид или марка</option>
+                </select>
+              </div>
+              <div class="field field-full" id="fuel-custom-field" hidden>
+                <label for="fuel-custom">Наименование и марка топлива</label>
+                <input id="fuel-custom" type="text" maxlength="180">
+              </div>
               <div class="field field-full">
                 <label for="freight-mode">Как посчитать доставку</label>
                 <select id="freight-mode">
@@ -365,8 +403,9 @@
               <input id="quote-client" type="text" maxlength="180" required>
             </div>
             <div class="field">
-              <label for="quote-fuel">Топливо и марка</label>
-              <input id="quote-fuel" type="text" maxlength="180" required>
+              <label for="quote-fuel">Топливо и марка в КП</label>
+              <input id="quote-fuel" type="text" maxlength="180" aria-describedby="quote-fuel-hint">
+              <p class="hint" id="quote-fuel-hint">Можно уточнить наименование для клиента.</p>
             </div>
             <div class="field field-full">
               <label for="quote-delivery">Адрес или условия поставки</label>
@@ -412,6 +451,25 @@
               <label for="quote-notes">Дополнительные условия</label>
               <textarea id="quote-notes" rows="2" maxlength="700"></textarea>
             </div>
+            <div class="field field-full">
+              <label for="quote-supplier">Реквизиты поставщика</label>
+              <textarea id="quote-supplier" rows="4" maxlength="850">ООО «Центр Топливных Решений» (ООО «ЦТР»)
+ИНН 7722368477 · КПП 772901001 · ОГРН 1167746608380
+119530, г. Москва, Очаковское шоссе, д. 30, стр. 1, этаж 2, помещ. 3, ком. 1</textarea>
+            </div>
+            <div class="field field-full">
+              <label class="quote-bank-label" for="quote-include-bank">
+                <input id="quote-include-bank" type="checkbox" aria-controls="quote-bank-field">
+                Добавить банковские реквизиты в КП
+              </label>
+            </div>
+            <div class="field field-full" id="quote-bank-field" hidden>
+              <label for="quote-bank">Банковские реквизиты</label>
+              <textarea id="quote-bank" rows="4" maxlength="700">АО «АЛЬФА-БАНК», г. Москва
+БИК 044525593
+Расчётный счёт 40702810202680001882
+Корреспондентский счёт 30101810200000000593</textarea>
+            </div>
           </div>
           <p class="hint" id="quote-hint">Укажите цену продажи или маржу в разделе «Маржа и цена для клиента».</p>
           <div class="quote-actions">
@@ -440,6 +498,11 @@
           <p id="quote-vat-out" hidden></p>
           <p id="quote-notes-out" class="quote-notes" hidden></p>
           <p id="quote-contact-out" hidden></p>
+          <section class="quote-requisites" id="quote-requisites" aria-labelledby="quote-requisites-title" hidden>
+            <h3 id="quote-requisites-title">Реквизиты поставщика</h3>
+            <p id="quote-supplier-out" class="quote-notes" hidden></p>
+            <p id="quote-bank-out" class="quote-notes" hidden></p>
+          </section>
         </article>
       </details>
     </div>
@@ -483,6 +546,13 @@
     }
 
     function calculate() {
+      const customFuel = byId('fuel-type').value === 'custom';
+      byId('fuel-custom-field').hidden = !customFuel;
+      const fuelName = (customFuel ? byId('fuel-custom').value : byId('fuel-type').value).trim();
+      byId('quote-fuel').placeholder = fuelName;
+      byId('quote-fuel-hint').textContent = fuelName
+        ? 'По умолчанию в КП подставляется вид топлива из расчёта.'
+        : 'Укажите марку здесь или выберите вид топлива в расчёте.';
       const inputs = Object.fromEntries(numericFields.map(id => [id, parseNumber(byId(id).value)]));
       const {distance, rate, quantity, price, density} = inputs;
       const quantityUnit = byId('quantity-unit').value;
@@ -629,7 +699,7 @@
       ];
       byId('copy-journal').disabled = invalid.size > 0 || !Number.isFinite(total)
         || (saleEntered && !Number.isFinite(saleTotal));
-      quotePrices = {load, quantityUnit, saleBefore, saleTotal, creditDays, annual};
+      quotePrices = {load, quantityUnit, saleBefore, saleTotal, creditDays, annual, fuelName};
       byId('quote-days-field').hidden = annual || !(creditDays > 0);
       byId('quote-hint').textContent = Number.isFinite(saleBefore)
         ? 'Итог в КП считается по цене за единицу, округлённой до копеек.'
@@ -685,13 +755,13 @@
     }
 
     function updateQuote() {
-      const {load, quantityUnit, saleBefore, saleTotal, creditDays, annual} = quotePrices;
+      const {load, quantityUnit, saleBefore, saleTotal, creditDays, annual, fuelName} = quotePrices;
       const choice = byId('quote-unit').value;
       const unit = choice === 'load' ? quantityUnit : choice;
       const amount = load[unit];
       const volume = Number.isFinite(amount) ? Number(amount.toFixed(6)) : NaN;
       const client = byId('quote-client').value.trim();
-      const fuel = byId('quote-fuel').value.trim();
+      const fuel = byId('quote-fuel').value.trim() || fuelName;
       const deferred = creditDays > 0;
       let error = '';
       if (!Number.isFinite(saleBefore)) error = 'Укажите цену продажи или маржу и проверьте данные расчёта.';
@@ -728,6 +798,11 @@
       optionalQuoteLine('quote-vat-out', '', {included: 'НДС включён в цену.', excluded: 'Цена без НДС.'}[vat]);
       optionalQuoteLine('quote-notes-out', '', byId('quote-notes').value.trim());
       optionalQuoteLine('quote-contact-out', 'Контакт — ', byId('quote-contact').value.trim());
+      const supplier = byId('quote-supplier').value.trim();
+      const bank = byId('quote-include-bank').checked ? byId('quote-bank').value.trim() : '';
+      optionalQuoteLine('quote-supplier-out', '', supplier);
+      optionalQuoteLine('quote-bank-out', '', bank);
+      byId('quote-requisites').hidden = !(supplier || bank);
       return true;
     }
 
@@ -743,8 +818,12 @@
     byId('copy-journal').addEventListener('click', copyJournalRow);
     const quoteForm = byId('quote-form');
     quoteForm.addEventListener('submit', event => { event.preventDefault(); previewQuote(); });
-    quoteForm.addEventListener('input', () => { if (quoteRequested) updateQuote(); });
-    quoteForm.addEventListener('change', () => { if (quoteRequested) updateQuote(); });
+    function refreshQuoteForm() {
+      byId('quote-bank-field').hidden = !byId('quote-include-bank').checked;
+      if (quoteRequested) updateQuote();
+    }
+    quoteForm.addEventListener('input', refreshQuoteForm);
+    quoteForm.addEventListener('change', refreshQuoteForm);
     byId('quote-preview-button').addEventListener('click', previewQuote);
     byId('mobile-quote-link').addEventListener('click', () => { byId('quote-panel').open = true; });
     byId('quote-print').addEventListener('click', () => { if (updateQuote()) window.print(); });
