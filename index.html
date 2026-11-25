@@ -59,6 +59,11 @@
     .journal button { margin-top: 10px; padding: 10px 13px; font: inherit; font-weight: 700; color: #fff; background: #292720; border: 1px solid #292720; border-radius: 4px; cursor: pointer; }
     .journal button:disabled { opacity: .55; cursor: default; }
     .journal textarea { margin-top: 8px; width: 100%; }
+    .journal .fields { margin: 10px 0; }
+    .export-blocks { padding: 0; list-style: none; margin: 8px 0 0; }
+    .export-blocks li { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; padding: 8px 0; border-top: 1px solid var(--line); }
+    .export-blocks li > span { flex: 1 1 180px; overflow-wrap: anywhere; }
+    .export-blocks button { margin-top: 0; }
     .quote-panel { margin-top: 22px; }
     .quote-panel summary { cursor: pointer; font: 700 23px Ubuntu, "Trebuchet MS", Arial, sans-serif; }
     .quote-panel form { margin-top: 20px; }
@@ -292,6 +297,8 @@
                   <select id="credit-mode" aria-describedby="credit-hint">
                     <option value="kg">Дневная ставка за килограмм</option>
                     <option value="l">Дневная ставка за литр</option>
+                    <option value="t">Дневная ставка за тонну</option>
+                    <option value="trip">Дневная ставка за рейс</option>
                     <option value="annual">Процент годовых</option>
                   </select>
                 </div>
@@ -306,6 +313,14 @@
                 <div id="credit-l-field" class="field" hidden>
                   <label for="credit-l">Ставка, ₽/л в день</label>
                   <input id="credit-l" inputmode="decimal" autocomplete="off">
+                </div>
+                <div id="credit-t-field" class="field" hidden>
+                  <label for="credit-t">Ставка, ₽/т в день</label>
+                  <input id="credit-t" inputmode="decimal" autocomplete="off">
+                </div>
+                <div id="credit-trip-field" class="field" hidden>
+                  <label for="credit-trip">Ставка, ₽/рейс в день</label>
+                  <input id="credit-trip" inputmode="decimal" autocomplete="off">
                 </div>
                 <div id="credit-rate-field" class="field" hidden>
                   <label for="credit-rate">Ставка, % годовых</label>
@@ -328,10 +343,11 @@
                   <label for="sale-mode">Как задать цену продажи</label>
                   <select id="sale-mode" aria-describedby="sale-hint">
                     <option value="price">Указать готовую цену</option>
-                    <option value="markup">Добавить маржу в рублях за единицу</option>
+                    <option value="markup">Добавить наценку в рублях за единицу</option>
                     <option value="margin">Задать маржу в процентах от цены продажи</option>
                   </select>
                   <p class="hint" id="sale-hint">Цена включает доставку. Стоимость отсрочки прибавляется отдельно.</p>
+                  <p class="hint">Маржа в процентах показывает, какую долю цены продажи составляет разница между ценой и себестоимостью с доставкой. Например, при себестоимости 90 ₽/л и цене продажи 100 ₽/л маржа составляет 10%.</p>
                 </div>
                 <div id="sale-unit-field" class="field">
                   <label id="sale-input-label" for="sale-price">Цена продажи без отсрочки</label>
@@ -399,12 +415,53 @@
               </dl>
             </section>
           </div>
-          <section class="journal" aria-labelledby="journal-label">
-            <label id="journal-label" for="journal-reference">Клиент или маршрут для журнала</label>
-            <input id="journal-reference" type="text" autocomplete="off">
+          <section class="journal" aria-labelledby="journal-title">
+            <h3 id="journal-title">Google Таблицы</h3>
+            <label for="export-template">Лист для вставки</label>
+            <select id="export-template">
+              <option value="general">Общий журнал</option>
+              <optgroup label="Женя">
+                <option value="jenya-shipping">Женя Отгрузки</option>
+                <option value="jenya-receipts">Женя поступления денег</option>
+              </optgroup>
+              <optgroup label="Наталия">
+                <option value="natalia-shipping">Наталия Отгрузки</option>
+                <option value="natalia-calculation">Наталия РАСЧЕТ</option>
+                <option value="natalia-receipts">Наталия поступления денег</option>
+              </optgroup>
+            </select>
+            <div class="fields">
+              <div class="field">
+                <label for="journal-reference">Клиент</label>
+                <input id="journal-reference" type="text" autocomplete="off">
+              </div>
+              <div class="field" id="export-supplier-field" hidden>
+                <label for="export-supplier">Поставщик или нефтебаза</label>
+                <input id="export-supplier" type="text" autocomplete="off">
+              </div>
+            </div>
+            <div id="sheet-export" hidden>
+              <div class="fields">
+                <div class="field">
+                  <label for="export-row">Номер свободной строки</label>
+                  <input id="export-row" inputmode="numeric" autocomplete="off">
+                </div>
+                <div class="field">
+                  <label for="export-unit">Единица в таблице</label>
+                  <select id="export-unit">
+                    <option value="auto">По загрузке</option>
+                    <option value="l">Литры</option>
+                    <option value="kg">Килограммы</option>
+                  </select>
+                </div>
+              </div>
+              <p class="hint" id="export-hint"></p>
+              <ul class="export-blocks" id="export-blocks"></ul>
+              <p class="hint" id="export-check"></p>
+            </div>
             <button type="button" id="copy-journal">Скопировать строку для Google Таблиц</button>
             <p class="hint" id="journal-status" role="status">Вставьте строку в колонку A первой свободной строки журнала.</p>
-            <textarea id="journal-row" aria-label="Строка для журнала" rows="2" readonly hidden></textarea>
+            <textarea id="journal-row" aria-label="Данные для вставки" rows="2" readonly hidden></textarea>
           </section>
         </section>
       </div>
@@ -550,14 +607,15 @@
     const byId = id => document.getElementById(id);
     const units = ['t', 'kg', 'l'];
     const unitLabels = {t: 'т', kg: 'кг', l: 'л'};
-    const saleLabels = {price: 'Готовая цена', markup: 'Маржа в рублях', margin: 'Маржа в процентах'};
-    const creditInputs = {kg: 'credit-kg', l: 'credit-l', annual: 'credit-rate'};
-    const creditLabels = {kg: '₽/кг в день', l: '₽/л в день', annual: '% годовых'};
+    const saleLabels = {price: 'Готовая цена', markup: 'Наценка в рублях', margin: 'Маржа в процентах'};
+    const creditInputs = {kg: 'credit-kg', l: 'credit-l', t: 'credit-t', trip: 'credit-trip', annual: 'credit-rate'};
+    const creditLabels = {kg: '₽/кг в день', l: '₽/л в день', t: '₽/т в день', trip: '₽/рейс в день', annual: '% годовых'};
     const numericFields = [
       'distance', 'rate', 'freight-fixed', 'quantity', 'price', 'density',
       'credit-days', ...Object.values(creditInputs), 'sale-price', 'markup-value', 'margin-percent', 'vat-rate'
     ];
     let journalValues = [];
+    let sheetValues;
     let quotePrices;
     let quoteRequested = false;
     const formatter = new Intl.NumberFormat('ru-RU', {
@@ -612,7 +670,9 @@
       byId('credit-days-label').textContent = annual ? 'Календарные дни' : 'Оплачиваемые дни';
       byId('credit-hint').textContent = annual
         ? 'Сумма × ставка / 100 × дни / 365.'
-        : 'Ставка × количество × дни. Если в договоре указаны рабочие дни, введите их количество.';
+        : creditMode === 'trip'
+          ? 'Ставка за рейс × оплачиваемые дни.'
+          : 'Ставка × количество × оплачиваемые дни. Если в договоре указаны рабочие дни, введите их количество.';
       const creditDays = byId('credit-days').value.trim() ? inputs['credit-days'] : 0;
       const creditRate = byId(creditInput).value.trim() ? inputs[creditInput] : 0;
       const validCreditDays = Number.isSafeInteger(creditDays);
@@ -622,7 +682,7 @@
       if (validCreditDays && validCreditRate) {
         if (creditDays === 0 || creditRate === 0) creditCost = 0;
         else if (annual) creditCost = creditBase * (creditRate / 100) * (creditDays / 365);
-        else if (quantity > 0) creditCost = load[creditMode] * creditRate * creditDays;
+        else if (quantity > 0) creditCost = (creditMode === 'trip' ? 1 : load[creditMode]) * creditRate * creditDays;
       }
       const total = subtotal + creditCost;
 
@@ -651,13 +711,18 @@
       byId('margin-percent-field').hidden = !percentMode;
       const saleLabel = byId('sale-input-label');
       saleLabel.htmlFor = saleInput;
-      saleLabel.textContent = markupMode ? 'Маржа за единицу' : 'Цена продажи без отсрочки';
+      saleLabel.textContent = markupMode ? 'Наценка за единицу' : 'Цена продажи без отсрочки';
+      byId('sale-hint').textContent = percentMode
+        ? 'Цена продажи = себестоимость с доставкой ÷ (1 − процент маржи / 100). Отсрочка добавляется отдельно.'
+        : markupMode
+          ? 'Наценка в рублях прибавляется к себестоимости с доставкой за выбранную единицу.'
+          : 'Введите цену с доставкой. Стоимость отсрочки прибавляется отдельно.';
       const saleEntered = byId(saleInput).value.trim() !== '';
       const saleUnit = byId('sale-unit').value;
       const saleValue = inputs[saleInput];
       const validSale = Number.isFinite(saleValue) && (!percentMode || saleValue < 100);
       const vatRate = byId('vat-rate').value.trim() ? inputs['vat-rate'] : 0;
-      const needsCreditConversion = !annual && creditDays > 0 && creditRate > 0
+      const needsCreditConversion = !annual && creditMode !== 'trip' && creditDays > 0 && creditRate > 0
         && (quantityUnit === 'l') !== (creditMode === 'l');
       const needsPurchaseConversion = (quantityUnit === 'l') !== (priceUnit === 'l');
       const needsSaleConversion = saleEntered && !percentMode && (quantityUnit === 'l') !== (saleUnit === 'l');
@@ -737,6 +802,11 @@
       ];
       byId('copy-journal').disabled = invalid.size > 0 || !Number.isFinite(total)
         || (saleEntered && !Number.isFinite(saleTotal));
+      sheetValues = {
+        ready: !byId('copy-journal').disabled, load, quantityUnit, fuel, freight, creditDays,
+        creditCost, saleTotal
+      };
+      updateSheetExport();
       quotePrices = {load, quantityUnit, saleBefore, saleTotal, creditDays, annual, fuelName};
       byId('quote-days-field').hidden = annual || !(creditDays > 0);
       updateQuoteUnitLabel();
@@ -751,22 +821,140 @@
       dateStyle: 'short', timeStyle: 'short', timeZone: 'Europe/Moscow'
     });
     const journalHint = 'Вставьте строку в колонку A первой свободной строки журнала.';
-    async function copyJournalRow() {
-      const name = byId('journal-reference').value.replace(/[\t\r\n]/g, ' ').trim();
-      const safeName = /^[=+@\-]/.test(name) ? "'" + name : name;
+    function journalCell(value) {
+      if (typeof value === 'number') return Number.isFinite(value) ? journalNumber.format(value) : '';
+      const clean = value.replace(/[\t\r\n]/g, ' ').trim();
+      return /^[=+@\-]/.test(clean) ? "'" + clean : clean;
+    }
+
+    async function copyToJournal(value, hint) {
       const row = byId('journal-row');
-      row.value = [journalDate.format(new Date()), safeName, ...journalValues.map(value =>
-        typeof value !== 'number' ? value : Number.isFinite(value) ? journalNumber.format(value) : ''
-      )].join('\t');
+      row.value = value;
       const status = byId('journal-status');
       try {
-        await navigator.clipboard.writeText(row.value);
+        await navigator.clipboard.writeText(value);
         row.hidden = true;
-        status.textContent = 'Строка скопирована. ' + journalHint;
+        status.textContent = 'Данные скопированы. ' + hint;
       } catch {
         row.hidden = false;
         row.select();
-        status.textContent = 'Нажмите Ctrl+C. ' + journalHint;
+        status.textContent = 'Скопируйте выделенные данные. ' + hint;
+      }
+    }
+
+    function copyJournalRow() {
+      const name = journalCell(byId('journal-reference').value);
+      return copyToJournal([journalDate.format(new Date()), name, ...journalValues.map(journalCell)].join('\t'), journalHint);
+    }
+
+    function updateSheetExport() {
+      const template = byId('export-template').value;
+      const general = template === 'general';
+      const receipts = template.endsWith('-receipts');
+      const jenyaShipping = template === 'jenya-shipping';
+      byId('sheet-export').hidden = general;
+      byId('export-supplier-field').hidden = general;
+      byId('copy-journal').hidden = !general;
+      byId('journal-row').hidden = true;
+      byId('journal-status').textContent = general ? journalHint : '';
+      if (general) return;
+
+      const hint = byId('export-hint');
+      const blocks = byId('export-blocks');
+      const check = byId('export-check');
+      blocks.replaceChildren();
+      check.textContent = '';
+      const row = Number(byId('export-row').value.trim());
+      const firstRow = receipts ? 7 : 4;
+      if (!Number.isSafeInteger(row) || row < firstRow) {
+        hint.textContent = 'Введите номер свободной строки. Первая строка данных под заголовком — ' + firstRow + '.';
+        return;
+      }
+      if (!sheetValues.ready) {
+        hint.textContent = 'Проверьте исходные данные калькулятора.';
+        return;
+      }
+      const {load, quantityUnit, fuel, freight, creditDays, creditCost, saleTotal} = sheetValues;
+      const selectedUnit = byId('export-unit').value;
+      const liters = selectedUnit === 'auto' ? quantityUnit === 'l' : selectedUnit === 'l';
+      const amount = load[liters ? 'l' : 'kg'];
+      if (!(Number.isFinite(amount) && amount > 0)) {
+        hint.textContent = 'Для выбранной единицы введите плотность топлива.';
+        return;
+      }
+
+      const name = byId('journal-reference').value;
+      const supplier = byId('export-supplier').value;
+      const purchase = fuel / amount;
+      const sale = saleTotal / amount;
+      const amountColumn = liters ? 'D' : 'E';
+      const unit = liters ? 'л' : 'кг';
+      const fields = [
+        ['C', 'Клиент', name],
+        [amountColumn, 'Объём, ' + unit, amount]
+      ];
+      if (receipts) {
+        fields.push(
+          [liters ? 'F' : 'G', 'Продажа с отсрочкой, ₽/' + unit, sale],
+          [liters ? 'L' : 'N', 'Закупка, ₽/' + unit, purchase],
+          ['P', 'Дни отсрочки', creditDays],
+          ['R', 'Поставщик или нефтебаза', supplier],
+          ['S', 'Доставка, ₽', freight]
+        );
+      } else {
+        fields.push(
+          ['F', 'Поставщик или нефтебаза', supplier],
+          ['G', 'Закупка, ₽/т', fuel / load.t],
+          [liters ? 'H' : 'I', 'Закупка, ₽/' + unit, purchase, jenyaShipping && liters],
+          ['K', 'Доставка, ₽', freight, jenyaShipping],
+          ['L', 'Дни отсрочки', creditDays],
+          [liters ? 'O' : 'P', 'Продажа с отсрочкой, ₽/' + unit, sale]
+        );
+      }
+      hint.textContent = 'Скопируйте нужные значения и вставьте их в указанные ячейки свободной строки. Для объёма и цены используйте колонки только одной единицы.';
+      const notes = [];
+      if (creditDays > 0) {
+        notes.push('Отсрочка в калькуляторе — ' + journalNumber.format(creditCost)
+          + ' ₽. Лист посчитает её по своей ставке. Сверьте сумму после вставки.');
+      }
+      if (jenyaShipping) notes.push('На листе Жени встречаются строки с ошибкой #REF!. Перед вставкой проверьте, что формулы выбранной строки ссылаются на нужные ячейки.');
+      if (!Number.isFinite(sale)) notes.push('Укажите цену продажи или маржу, чтобы добавить цену для клиента.');
+      check.textContent = notes.join(' ');
+      const groups = [];
+      for (const field of fields) {
+        const [column, , value, mixed] = field;
+        if (journalCell(value) === '') continue;
+        const previousGroup = groups[groups.length - 1];
+        const previous = previousGroup?.[previousGroup.length - 1];
+        if (!mixed && previous && !previous[3] && column.charCodeAt(0) === previous[0].charCodeAt(0) + 1) {
+          previousGroup.push(field);
+        } else {
+          groups.push([field]);
+        }
+      }
+      for (const group of groups) {
+        const [column, , , mixed] = group[0];
+        const start = column + row;
+        const target = group.length === 1 ? start : start + ':' + group[group.length - 1][0] + row;
+        const item = document.createElement('li');
+        const description = document.createElement('span');
+        const addressLabel = document.createElement('strong');
+        addressLabel.textContent = target + ' ';
+        description.append(addressLabel, group.map(([, label, value]) =>
+          label + ' · ' + (typeof value === 'number' ? journalNumber.format(value) : value.trim())
+        ).join(' / '));
+        item.append(description);
+        if (mixed) {
+          description.append(' · Для сверки. Внесите вручную, если в ячейке нет формулы.');
+        } else {
+          const button = document.createElement('button');
+          button.type = 'button';
+          button.textContent = 'Скопировать для ' + target;
+          button.addEventListener('click', () => copyToJournal(group.map(([, , value]) => journalCell(value)).join('\t'),
+            'Начните вставку с ячейки ' + start + '.'));
+          item.append(button);
+        }
+        blocks.append(item);
       }
     }
 
@@ -889,6 +1077,9 @@
     form.addEventListener('input', calculate);
     form.addEventListener('change', calculate);
     byId('copy-journal').addEventListener('click', copyJournalRow);
+    for (const id of ['export-template', 'export-row', 'export-unit', 'journal-reference', 'export-supplier']) {
+      byId(id).addEventListener(id === 'export-template' || id === 'export-unit' ? 'change' : 'input', updateSheetExport);
+    }
     const quoteForm = byId('quote-form');
     quoteForm.addEventListener('submit', event => { event.preventDefault(); previewQuote(); });
     function refreshQuoteForm() {
