@@ -60,10 +60,6 @@
     .journal button:disabled { opacity: .55; cursor: default; }
     .journal textarea { margin-top: 8px; width: 100%; }
     .journal .fields { margin: 10px 0; }
-    .export-blocks { padding: 0; list-style: none; margin: 8px 0 0; }
-    .export-blocks li { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; padding: 8px 0; border-top: 1px solid var(--line); }
-    .export-blocks li > span { flex: 1 1 180px; overflow-wrap: anywhere; }
-    .export-blocks button { margin-top: 0; }
     .quote-panel { margin-top: 22px; }
     .quote-panel summary { cursor: pointer; font: 700 23px Ubuntu, "Trebuchet MS", Arial, sans-serif; }
     .quote-panel form { margin-top: 20px; }
@@ -419,6 +415,7 @@
             <h3 id="journal-title">Google Таблицы</h3>
             <label for="export-template">Лист для вставки</label>
             <select id="export-template">
+              <option value="roman-shipping">Роман Отгрузки</option>
               <option value="general">Общий журнал</option>
               <optgroup label="Женя">
                 <option value="jenya-shipping">Женя Отгрузки</option>
@@ -443,8 +440,12 @@
             <div id="sheet-export" hidden>
               <div class="fields">
                 <div class="field">
-                  <label for="export-row">Номер свободной строки</label>
-                  <input id="export-row" inputmode="numeric" autocomplete="off">
+                  <label for="export-date">Дата отгрузки</label>
+                  <input id="export-date" type="date">
+                </div>
+                <div class="field" id="export-crm-field" hidden>
+                  <label for="export-crm">Ссылка CRM</label>
+                  <input id="export-crm" type="url" autocomplete="off">
                 </div>
                 <div class="field">
                   <label for="export-unit">Единица в таблице</label>
@@ -456,7 +457,6 @@
                 </div>
               </div>
               <p class="hint" id="export-hint"></p>
-              <ul class="export-blocks" id="export-blocks"></ul>
               <p class="hint" id="export-check"></p>
             </div>
             <button type="button" id="copy-journal">Скопировать строку для Google Таблиц</button>
@@ -800,11 +800,12 @@
         saleBefore / load.l, saleTotal / load.l, saleBefore / load.kg, saleTotal / load.kg,
         saleBefore / load.t, saleTotal / load.t, netProfit, margin
       ];
-      byId('copy-journal').disabled = invalid.size > 0 || !Number.isFinite(total)
-        || (saleEntered && !Number.isFinite(saleTotal));
       sheetValues = {
-        ready: !byId('copy-journal').disabled, load, quantityUnit, fuel, freight, creditDays,
-        creditCost, saleTotal
+        ready: !invalid.size && Number.isFinite(total) && (!saleEntered || Number.isFinite(saleTotal)),
+        load, quantityUnit, price, priceUnit, density: validDensity ? density : NaN,
+        fuel, freight, creditDays, creditMode, creditRate,
+        creditFuelOnly: byId('credit-base').value === 'fuel',
+        saleTotal
       };
       updateSheetExport();
       quotePrices = {load, quantityUnit, saleBefore, saleTotal, creditDays, annual, fuelName};
@@ -842,121 +843,127 @@
       }
     }
 
+
     function copyJournalRow() {
-      const name = journalCell(byId('journal-reference').value);
-      return copyToJournal([journalDate.format(new Date()), name, ...journalValues.map(journalCell)].join('\t'), journalHint);
+      const select = byId('export-template');
+      if (select.value === 'general') {
+        const name = journalCell(byId('journal-reference').value);
+        return copyToJournal([journalDate.format(new Date()), name, ...journalValues.map(journalCell)].join('\t'), journalHint);
+      }
+      const title = select.options[select.selectedIndex].textContent;
+      return copyToJournal(buildSheetRow(select.value), 'Вставьте в ячейку A свободной строки листа «' + title + '».');
+    }
+
+    function sheetUnit() {
+      const unit = byId('export-unit').value;
+      return unit === 'auto' ? (sheetValues.quantityUnit === 'l' ? 'l' : 'kg') : unit;
     }
 
     function updateSheetExport() {
       const template = byId('export-template').value;
       const general = template === 'general';
-      const receipts = template.endsWith('-receipts');
-      const jenyaShipping = template === 'jenya-shipping';
+      const roman = template === 'roman-shipping';
       byId('sheet-export').hidden = general;
       byId('export-supplier-field').hidden = general;
-      byId('copy-journal').hidden = !general;
+      byId('export-crm-field').hidden = !roman;
       byId('journal-row').hidden = true;
       byId('journal-status').textContent = general ? journalHint : '';
+      const amount = sheetValues.load[sheetUnit()];
+      const needsDensity = !(Number.isFinite(amount) && amount > 0);
+      const crm = byId('export-crm');
+      const invalidCrm = roman && crm.value.trim() && (!/^https?:\/\//i.test(crm.value.trim()) || !crm.validity.valid);
+      byId('copy-journal').disabled = !sheetValues.ready || (!general && Boolean(needsDensity || invalidCrm));
       if (general) return;
-
       const hint = byId('export-hint');
-      const blocks = byId('export-blocks');
-      const check = byId('export-check');
-      blocks.replaceChildren();
-      check.textContent = '';
-      const row = Number(byId('export-row').value.trim());
-      const firstRow = receipts ? 7 : 4;
-      if (!Number.isSafeInteger(row) || row < firstRow) {
-        hint.textContent = 'Введите номер свободной строки. Первая строка данных под заголовком — ' + firstRow + '.';
-        return;
-      }
-      if (!sheetValues.ready) {
-        hint.textContent = 'Проверьте исходные данные калькулятора.';
-        return;
-      }
-      const {load, quantityUnit, fuel, freight, creditDays, creditCost, saleTotal} = sheetValues;
-      const selectedUnit = byId('export-unit').value;
-      const liters = selectedUnit === 'auto' ? quantityUnit === 'l' : selectedUnit === 'l';
-      const amount = load[liters ? 'l' : 'kg'];
-      if (!(Number.isFinite(amount) && amount > 0)) {
-        hint.textContent = 'Для выбранной единицы введите плотность топлива.';
-        return;
-      }
-
-      const name = byId('journal-reference').value;
-      const supplier = byId('export-supplier').value;
-      const purchase = fuel / amount;
-      const sale = saleTotal / amount;
-      const amountColumn = liters ? 'D' : 'E';
-      const unit = liters ? 'л' : 'кг';
-      const fields = [
-        ['C', 'Клиент', name],
-        [amountColumn, 'Объём, ' + unit, amount]
-      ];
-      if (receipts) {
-        fields.push(
-          [liters ? 'F' : 'G', 'Продажа с отсрочкой, ₽/' + unit, sale],
-          [liters ? 'L' : 'N', 'Закупка, ₽/' + unit, purchase],
-          ['P', 'Дни отсрочки', creditDays],
-          ['R', 'Поставщик или нефтебаза', supplier],
-          ['S', 'Доставка, ₽', freight]
-        );
-      } else {
-        fields.push(
-          ['F', 'Поставщик или нефтебаза', supplier],
-          ['G', 'Закупка, ₽/т', fuel / load.t],
-          [liters ? 'H' : 'I', 'Закупка, ₽/' + unit, purchase, jenyaShipping && liters],
-          ['K', 'Доставка, ₽', freight, jenyaShipping],
-          ['L', 'Дни отсрочки', creditDays],
-          [liters ? 'O' : 'P', 'Продажа с отсрочкой, ₽/' + unit, sale]
-        );
-      }
-      hint.textContent = 'Скопируйте нужные значения и вставьте их в указанные ячейки свободной строки. Для объёма и цены используйте колонки только одной единицы.';
-      const notes = [];
-      if (creditDays > 0) {
-        notes.push('Отсрочка в калькуляторе — ' + journalNumber.format(creditCost)
-          + ' ₽. Лист посчитает её по своей ставке. Сверьте сумму после вставки.');
-      }
-      if (jenyaShipping) notes.push('На листе Жени встречаются строки с ошибкой #REF!. Перед вставкой проверьте, что формулы выбранной строки ссылаются на нужные ячейки.');
-      if (!Number.isFinite(sale)) notes.push('Укажите цену продажи или маржу, чтобы добавить цену для клиента.');
-      check.textContent = notes.join(' ');
-      const groups = [];
-      for (const field of fields) {
-        const [column, , value, mixed] = field;
-        if (journalCell(value) === '') continue;
-        const previousGroup = groups[groups.length - 1];
-        const previous = previousGroup?.[previousGroup.length - 1];
-        if (!mixed && previous && !previous[3] && column.charCodeAt(0) === previous[0].charCodeAt(0) + 1) {
-          previousGroup.push(field);
-        } else {
-          groups.push([field]);
-        }
-      }
-      for (const group of groups) {
-        const [column, , , mixed] = group[0];
-        const start = column + row;
-        const target = group.length === 1 ? start : start + ':' + group[group.length - 1][0] + row;
-        const item = document.createElement('li');
-        const description = document.createElement('span');
-        const addressLabel = document.createElement('strong');
-        addressLabel.textContent = target + ' ';
-        description.append(addressLabel, group.map(([, label, value]) =>
-          label + ' · ' + (typeof value === 'number' ? journalNumber.format(value) : value.trim())
-        ).join(' / '));
-        item.append(description);
-        if (mixed) {
-          description.append(' · Для сверки. Внесите вручную, если в ячейке нет формулы.');
-        } else {
-          const button = document.createElement('button');
-          button.type = 'button';
-          button.textContent = 'Скопировать для ' + target;
-          button.addEventListener('click', () => copyToJournal(group.map(([, , value]) => journalCell(value)).join('\t'),
-            'Начните вставку с ячейки ' + start + '.'));
-          item.append(button);
-        }
-        blocks.append(item);
-      }
+      if (!sheetValues.ready) hint.textContent = 'Проверьте исходные данные калькулятора.';
+      else if (needsDensity) hint.textContent = 'Для выбранной единицы введите плотность топлива.';
+      else if (invalidCrm) hint.textContent = 'Укажите полную ссылку CRM, начиная с https://.';
+      else hint.textContent = 'Вставьте всю строку с колонки A в свободной строке выбранного листа.';
+      byId('export-check').textContent = Number.isFinite(sheetValues.saleTotal) ? ''
+        : 'Цена продажи останется пустой. Чтобы заполнить её, укажите цену или маржу.';
     }
+
+    function buildSheetRow(template) {
+      const receipts = template.endsWith('-receipts');
+      const roman = template === 'roman-shipping';
+      const {load, fuel, freight, density, creditDays, creditMode, creditRate, creditFuelOnly, saleTotal, price, priceUnit} = sheetValues;
+      const unit = sheetUnit();
+      const liters = unit === 'l';
+      const amount = load[unit];
+      const date = byId('export-date').value.split('-').reverse().join('.');
+      const row = Array(receipts || roman ? 23 : 21).fill('');
+      const index = column => column.charCodeAt(0) - 65;
+      const put = (column, value) => { row[index(column)] = journalCell(value); };
+      const formula = (column, expression) => { row[index(column)] = '=' + expression; };
+      // Resolve references after paste so the same clipboard row works anywhere in column A.
+      const cell = column => 'INDEX($' + column + ':$' + column + ';ROW())';
+      const num = column => 'N(' + cell(column) + ')';
+      const isNum = column => 'ISNUMBER(' + cell(column) + ')';
+      const quantity = '(' + num('D') + '+' + num('E') + ')';
+      const oneUnit = '(' + num('D') + '>0)<>(' + num('E') + '>0)';
+      const buyTotal = receipts ? 'O' : 'J';
+      const freightCol = receipts ? 'S' : 'K';
+      const daysCol = receipts ? 'P' : 'L';
+      const saleCols = receipts ? ['F','G'] : ['O','P'];
+      const buyCols = receipts ? ['L','N'] : ['H','I'];
+      const hasPrice = ([l, kg]) => 'IF(' + num('D') + '>0;' + isNum(l) + ';' + isNum(kg) + ')';
+      const sum = ([l, kg]) => num('D') + '*' + num(l) + '+' + num('E') + '*' + num(kg);
+      const rate = journalNumber.format(creditRate);
+      let dailyCredit = rate;
+      if (creditMode === 'annual') {
+        const base = num(buyTotal) + (creditFuelOnly ? '' : '+' + num(freightCol));
+        dailyCredit = '(' + base + ')*' + rate + '/36500/' + quantity;
+      } else if (creditMode === 'trip') {
+        dailyCredit = rate + '/' + quantity;
+      } else if (creditRate > 0 && creditMode !== unit) {
+        dailyCredit += '*' + journalNumber.format(load[creditMode] / amount);
+      }
+      const credit = num(daysCol) + '*' + dailyCredit;
+      put('C', byId('journal-reference').value);
+      put(liters ? 'D' : 'E', amount);
+      put(daysCol, creditDays);
+      put(freightCol, freight);
+      put(liters ? saleCols[0] : saleCols[1], saleTotal / amount);
+      const supplier = byId('export-supplier').value;
+      formula(buyTotal, 'IF(AND(' + oneUnit + ';' + hasPrice(buyCols) + ');' + sum(buyCols) + ';"")');
+
+
+      if (receipts) {
+        put('K', date);
+        put(liters ? 'L' : 'N', fuel / amount);
+        put('R', supplier);
+        for (const [target, volume, priceCol] of [['H','D','F'], ['I','E','G']]) {
+          formula(target, 'IF(AND(' + num(volume) + '>0;' + isNum(priceCol) + ');'
+            + num(volume) + '*' + num(priceCol) + ';"")');
+        }
+        formula('Q', 'IF(' + oneUnit + ';' + credit + '*' + quantity + ';"")');
+        formula('U', 'IF(AND(' + oneUnit + ';' + hasPrice(saleCols) + ';' + isNum('O') + ');('
+          + num('H') + '+' + num('I') + '-' + num('O') + '-' + num('S') + '-' + num('Q') + ')*100/122;"")');
+        formula('W', 'IF(' + cell('V') + '="да";' + num('U') + ';0)');
+      } else {
+        formula('A', 'IF(' + quantity + '>0;ROW()-' + (roman ? 5 : 3) + ';"")');
+        put('B', date);
+        put('F', supplier);
+        put('G', priceUnit === 't' ? price : priceUnit === 'kg' ? price * 1000 : fuel / load.t);
+        if (Number.isFinite(density)) {
+          formula('H', 'IF(' + isNum('G') + ';' + num('G') + '*' + journalNumber.format(density) + '/1000;"")');
+        } else if (liters && priceUnit === 'l') {
+          put('H', price);
+        }
+        formula('I', 'IF(' + isNum('G') + ';' + num('G') + '/1000;"")');
+        formula('M', 'IF(' + oneUnit + ';' + credit + ';"")');
+        formula('N', 'IF(' + isNum('M') + ';' + num('M') + '*' + quantity + ';"")');
+        formula('Q', 'IF(AND(' + oneUnit + ';' + hasPrice(saleCols) + ');' + sum(saleCols) + ';"")');
+        const totals = 'AND(' + isNum('Q') + ';' + isNum('J') + ')';
+        const difference = '(' + num('Q') + '-' + num('J') + ')';
+        formula('R', 'IF(' + totals + ';' + difference + '/' + quantity + ';"")');
+        formula('S', 'IF(AND(' + totals + ';' + num('Q') + '<>0);' + difference + '/' + num('Q') + ';"")');
+        formula('T', 'IF(' + totals + ';(' + difference + '-' + num('K') + '-' + num('N') + ')*100/122;"")');
+        if (roman) put('W', byId('export-crm').value);
+      }
+      return row.join('\t');
+    }
+
 
     const quoteDay = new Intl.DateTimeFormat('ru-RU', {dateStyle: 'long', timeZone: 'Europe/Moscow'});
     const quoteQuantity = new Intl.NumberFormat('ru-RU', {maximumFractionDigits: 6});
@@ -1077,9 +1084,10 @@
     form.addEventListener('input', calculate);
     form.addEventListener('change', calculate);
     byId('copy-journal').addEventListener('click', copyJournalRow);
-    for (const id of ['export-template', 'export-row', 'export-unit', 'journal-reference', 'export-supplier']) {
-      byId(id).addEventListener(id === 'export-template' || id === 'export-unit' ? 'change' : 'input', updateSheetExport);
+    for (const id of ['export-template', 'export-unit']) {
+      byId(id).addEventListener('change', updateSheetExport);
     }
+    byId('export-crm').addEventListener('input', updateSheetExport);
     const quoteForm = byId('quote-form');
     quoteForm.addEventListener('submit', event => { event.preventDefault(); previewQuote(); });
     function refreshQuoteForm() {
