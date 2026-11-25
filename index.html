@@ -415,32 +415,24 @@
             <h3 id="journal-title">Google Таблицы</h3>
             <label for="export-template">Лист для вставки</label>
             <select id="export-template">
-              <option value="roman-shipping">Роман Отгрузки</option>
-              <option value="general">Общий журнал</option>
-              <optgroup label="Женя">
-                <option value="jenya-shipping">Женя Отгрузки</option>
-                <option value="jenya-receipts">Женя поступления денег</option>
-              </optgroup>
-              <optgroup label="Наталия">
-                <option value="natalia-shipping">Наталия Отгрузки</option>
-                <option value="natalia-calculation">Наталия РАСЧЕТ</option>
-                <option value="natalia-receipts">Наталия поступления денег</option>
-              </optgroup>
+              <option value="roman-shipping">Рома</option>
+              <option value="jenya-shipping">Женя</option>
+              <option value="natalia-shipping">Наталья</option>
             </select>
             <div class="fields">
               <div class="field">
                 <label for="journal-reference">Клиент</label>
                 <input id="journal-reference" type="text" autocomplete="off">
               </div>
-              <div class="field" id="export-supplier-field" hidden>
+              <div class="field">
                 <label for="export-supplier">Поставщик или нефтебаза</label>
                 <input id="export-supplier" type="text" autocomplete="off">
               </div>
             </div>
-            <div id="sheet-export" hidden>
+            <div>
               <div class="fields">
                 <div class="field">
-                  <label for="export-date">Дата отгрузки</label>
+                  <label for="export-date">Дата</label>
                   <input id="export-date" type="date">
                 </div>
                 <div class="field" id="export-crm-field" hidden>
@@ -607,14 +599,11 @@
     const byId = id => document.getElementById(id);
     const units = ['t', 'kg', 'l'];
     const unitLabels = {t: 'т', kg: 'кг', l: 'л'};
-    const saleLabels = {price: 'Готовая цена', markup: 'Наценка в рублях', margin: 'Маржа в процентах'};
     const creditInputs = {kg: 'credit-kg', l: 'credit-l', t: 'credit-t', trip: 'credit-trip', annual: 'credit-rate'};
-    const creditLabels = {kg: '₽/кг в день', l: '₽/л в день', t: '₽/т в день', trip: '₽/рейс в день', annual: '% годовых'};
     const numericFields = [
       'distance', 'rate', 'freight-fixed', 'quantity', 'price', 'density',
       'credit-days', ...Object.values(creditInputs), 'sale-price', 'markup-value', 'margin-percent', 'vat-rate'
     ];
-    let journalValues = [];
     let sheetValues;
     let quotePrices;
     let quoteRequested = false;
@@ -789,17 +778,6 @@
           ? 'Для расчёта за тонну и килограмм укажите плотность.'
           : 'Для расчёта за литр укажите плотность.')
         : '';
-      journalValues = [
-        quantity, unitLabels[quantityUnit], density, price, '₽/' + unitLabels[priceUnit],
-        fixedFreight ? 'Готовая сумма' : 'По пробегу', fixedFreight ? '' : distance, fixedFreight ? '' : rate,
-        fuel, freight, creditDays, creditLabels[creditMode], creditRate,
-        annual ? (byId('credit-base').value === 'fuel' ? 'Топливо' : 'Топливо и доставка') : '',
-        creditCost, subtotal, total, saleEntered ? saleLabels[saleMode] : '', saleValue,
-        saleEntered ? (percentMode ? '%' : '₽/' + unitLabels[saleUnit]) : '',
-        saleEntered ? vatRate : '', saleBefore, saleTotal,
-        saleBefore / load.l, saleTotal / load.l, saleBefore / load.kg, saleTotal / load.kg,
-        saleBefore / load.t, saleTotal / load.t, netProfit, margin
-      ];
       sheetValues = {
         ready: !invalid.size && Number.isFinite(total) && (!saleEntered || Number.isFinite(saleTotal)),
         load, quantityUnit, price, priceUnit, density: validDensity ? density : NaN,
@@ -818,10 +796,6 @@
     }
 
     const journalNumber = new Intl.NumberFormat('ru-RU', {useGrouping: false, maximumFractionDigits: 8});
-    const journalDate = new Intl.DateTimeFormat('ru-RU', {
-      dateStyle: 'short', timeStyle: 'short', timeZone: 'Europe/Moscow'
-    });
-    const journalHint = 'Вставьте строку в колонку A первой свободной строки журнала.';
     function journalCell(value) {
       if (typeof value === 'number') return Number.isFinite(value) ? journalNumber.format(value) : '';
       const clean = value.replace(/[\t\r\n]/g, ' ').trim();
@@ -846,12 +820,8 @@
 
     function copyJournalRow() {
       const select = byId('export-template');
-      if (select.value === 'general') {
-        const name = journalCell(byId('journal-reference').value);
-        return copyToJournal([journalDate.format(new Date()), name, ...journalValues.map(journalCell)].join('\t'), journalHint);
-      }
       const title = select.options[select.selectedIndex].textContent;
-      return copyToJournal(buildSheetRow(select.value), 'Вставьте в ячейку A свободной строки листа «' + title + '».');
+      return copyToJournal(buildSheetRow(select.value), 'Вариант «' + title + '». Вставьте в ячейку A свободной строки.');
     }
 
     function sheetUnit() {
@@ -861,19 +831,15 @@
 
     function updateSheetExport() {
       const template = byId('export-template').value;
-      const general = template === 'general';
       const roman = template === 'roman-shipping';
-      byId('sheet-export').hidden = general;
-      byId('export-supplier-field').hidden = general;
       byId('export-crm-field').hidden = !roman;
       byId('journal-row').hidden = true;
-      byId('journal-status').textContent = general ? journalHint : '';
+      byId('journal-status').textContent = '';
       const amount = sheetValues.load[sheetUnit()];
       const needsDensity = !(Number.isFinite(amount) && amount > 0);
       const crm = byId('export-crm');
       const invalidCrm = roman && crm.value.trim() && (!/^https?:\/\//i.test(crm.value.trim()) || !crm.validity.valid);
-      byId('copy-journal').disabled = !sheetValues.ready || (!general && Boolean(needsDensity || invalidCrm));
-      if (general) return;
+      byId('copy-journal').disabled = !sheetValues.ready || Boolean(needsDensity || invalidCrm);
       const hint = byId('export-hint');
       if (!sheetValues.ready) hint.textContent = 'Проверьте исходные данные калькулятора.';
       else if (needsDensity) hint.textContent = 'Для выбранной единицы введите плотность топлива.';
@@ -884,14 +850,13 @@
     }
 
     function buildSheetRow(template) {
-      const receipts = template.endsWith('-receipts');
       const roman = template === 'roman-shipping';
       const {load, fuel, freight, density, creditDays, creditMode, creditRate, creditFuelOnly, saleTotal, price, priceUnit} = sheetValues;
       const unit = sheetUnit();
       const liters = unit === 'l';
       const amount = load[unit];
       const date = byId('export-date').value.split('-').reverse().join('.');
-      const row = Array(receipts || roman ? 23 : 21).fill('');
+      const row = Array(roman ? 23 : 21).fill('');
       const index = column => column.charCodeAt(0) - 65;
       const put = (column, value) => { row[index(column)] = journalCell(value); };
       const formula = (column, expression) => { row[index(column)] = '=' + expression; };
@@ -901,69 +866,47 @@
       const isNum = column => 'ISNUMBER(' + cell(column) + ')';
       const quantity = '(' + num('D') + '+' + num('E') + ')';
       const oneUnit = '(' + num('D') + '>0)<>(' + num('E') + '>0)';
-      const buyTotal = receipts ? 'O' : 'J';
-      const freightCol = receipts ? 'S' : 'K';
-      const daysCol = receipts ? 'P' : 'L';
-      const saleCols = receipts ? ['F','G'] : ['O','P'];
-      const buyCols = receipts ? ['L','N'] : ['H','I'];
       const hasPrice = ([l, kg]) => 'IF(' + num('D') + '>0;' + isNum(l) + ';' + isNum(kg) + ')';
       const sum = ([l, kg]) => num('D') + '*' + num(l) + '+' + num('E') + '*' + num(kg);
       const rate = journalNumber.format(creditRate);
       let dailyCredit = rate;
       if (creditMode === 'annual') {
-        const base = num(buyTotal) + (creditFuelOnly ? '' : '+' + num(freightCol));
+        const base = num('J') + (creditFuelOnly ? '' : '+' + num('K'));
         dailyCredit = '(' + base + ')*' + rate + '/36500/' + quantity;
       } else if (creditMode === 'trip') {
         dailyCredit = rate + '/' + quantity;
       } else if (creditRate > 0 && creditMode !== unit) {
         dailyCredit += '*' + journalNumber.format(load[creditMode] / amount);
       }
-      const credit = num(daysCol) + '*' + dailyCredit;
+      const credit = num('L') + '*' + dailyCredit;
       put('C', byId('journal-reference').value);
       put(liters ? 'D' : 'E', amount);
-      put(daysCol, creditDays);
-      put(freightCol, freight);
-      put(liters ? saleCols[0] : saleCols[1], saleTotal / amount);
+      put('L', creditDays);
+      put('K', freight);
+      put(liters ? 'O' : 'P', saleTotal / amount);
       const supplier = byId('export-supplier').value;
-      formula(buyTotal, 'IF(AND(' + oneUnit + ';' + hasPrice(buyCols) + ');' + sum(buyCols) + ';"")');
-
-
-      if (receipts) {
-        put('K', date);
-        put(liters ? 'L' : 'N', fuel / amount);
-        put('R', supplier);
-        for (const [target, volume, priceCol] of [['H','D','F'], ['I','E','G']]) {
-          formula(target, 'IF(AND(' + num(volume) + '>0;' + isNum(priceCol) + ');'
-            + num(volume) + '*' + num(priceCol) + ';"")');
-        }
-        formula('Q', 'IF(' + oneUnit + ';' + credit + '*' + quantity + ';"")');
-        formula('U', 'IF(AND(' + oneUnit + ';' + hasPrice(saleCols) + ';' + isNum('O') + ');('
-          + num('H') + '+' + num('I') + '-' + num('O') + '-' + num('S') + '-' + num('Q') + ')*100/122;"")');
-        formula('W', 'IF(' + cell('V') + '="да";' + num('U') + ';0)');
-      } else {
-        formula('A', 'IF(' + quantity + '>0;ROW()-' + (roman ? 5 : 3) + ';"")');
-        put('B', date);
-        put('F', supplier);
-        put('G', priceUnit === 't' ? price : priceUnit === 'kg' ? price * 1000 : fuel / load.t);
-        if (Number.isFinite(density)) {
-          formula('H', 'IF(' + isNum('G') + ';' + num('G') + '*' + journalNumber.format(density) + '/1000;"")');
-        } else if (liters && priceUnit === 'l') {
-          put('H', price);
-        }
-        formula('I', 'IF(' + isNum('G') + ';' + num('G') + '/1000;"")');
-        formula('M', 'IF(' + oneUnit + ';' + credit + ';"")');
-        formula('N', 'IF(' + isNum('M') + ';' + num('M') + '*' + quantity + ';"")');
-        formula('Q', 'IF(AND(' + oneUnit + ';' + hasPrice(saleCols) + ');' + sum(saleCols) + ';"")');
-        const totals = 'AND(' + isNum('Q') + ';' + isNum('J') + ')';
-        const difference = '(' + num('Q') + '-' + num('J') + ')';
-        formula('R', 'IF(' + totals + ';' + difference + '/' + quantity + ';"")');
-        formula('S', 'IF(AND(' + totals + ';' + num('Q') + '<>0);' + difference + '/' + num('Q') + ';"")');
-        formula('T', 'IF(' + totals + ';(' + difference + '-' + num('K') + '-' + num('N') + ')*100/122;"")');
-        if (roman) put('W', byId('export-crm').value);
+      formula('J', 'IF(AND(' + oneUnit + ';' + hasPrice(['H', 'I']) + ');' + sum(['H', 'I']) + ';"")');
+      formula('A', 'IF(' + quantity + '>0;ROW()-' + (roman ? 5 : 3) + ';"")');
+      put('B', date);
+      put('F', supplier);
+      put('G', priceUnit === 't' ? price : priceUnit === 'kg' ? price * 1000 : fuel / load.t);
+      if (Number.isFinite(density)) {
+        formula('H', 'IF(' + isNum('G') + ';' + num('G') + '*' + journalNumber.format(density) + '/1000;"")');
+      } else if (liters && priceUnit === 'l') {
+        put('H', price);
       }
+      formula('I', 'IF(' + isNum('G') + ';' + num('G') + '/1000;"")');
+      formula('M', 'IF(' + oneUnit + ';' + credit + ';"")');
+      formula('N', 'IF(' + isNum('M') + ';' + num('M') + '*' + quantity + ';"")');
+      formula('Q', 'IF(AND(' + oneUnit + ';' + hasPrice(['O', 'P']) + ');' + sum(['O', 'P']) + ';"")');
+      const totals = 'AND(' + isNum('Q') + ';' + isNum('J') + ')';
+      const difference = '(' + num('Q') + '-' + num('J') + ')';
+      formula('R', 'IF(' + totals + ';' + difference + '/' + quantity + ';"")');
+      formula('S', 'IF(AND(' + totals + ';' + num('Q') + '<>0);' + difference + '/' + num('Q') + ';"")');
+      formula('T', 'IF(' + totals + ';(' + difference + '-' + num('K') + '-' + num('N') + ')*100/122;"")');
+      if (roman) put('W', byId('export-crm').value);
       return row.join('\t');
     }
-
 
     const quoteDay = new Intl.DateTimeFormat('ru-RU', {dateStyle: 'long', timeZone: 'Europe/Moscow'});
     const quoteQuantity = new Intl.NumberFormat('ru-RU', {maximumFractionDigits: 6});
