@@ -60,6 +60,9 @@
     .journal button:disabled { opacity: .55; cursor: default; }
     .journal textarea { margin-top: 8px; width: 100%; }
     .journal .fields { margin: 10px 0; }
+    .sheet-preview { margin: 12px 0 0; padding: 10px 12px; border: 1px solid var(--line); border-radius: 4px; }
+    .sheet-preview summary { cursor: pointer; font-weight: 700; }
+    .sheet-preview dd { overflow-wrap: anywhere; }
     .quote-panel { margin-top: 22px; }
     .quote-panel summary { cursor: pointer; font: 700 23px Ubuntu, "Trebuchet MS", Arial, sans-serif; }
     .quote-panel form { margin-top: 20px; }
@@ -340,6 +343,10 @@
                 </div>
               </div>
               <p class="hint" id="credit-hint">Если отсрочка указана в рабочих днях, введите число рабочих дней по договору.</p>
+              <div class="quote-actions">
+                <button type="button" id="apply-sheet-terms" aria-describedby="sheet-terms-hint">Подставить ставки из таблицы</button>
+              </div>
+              <p class="hint" id="sheet-terms-hint">Ставка Жени и Наталии — 0,04 ₽ за литр или кг в день. НДС для расчёта прибыли — 22%.</p>
             </fieldset>
             <details class="sale">
               <summary>Маржа и цена для клиента</summary>
@@ -414,8 +421,8 @@
             <p id="conversion-note" class="hint"></p>
             <section id="sale-results" class="sale-results" hidden aria-labelledby="sale-heading">
               <h3 id="sale-heading">Цена для клиента и прибыль</h3>
-              <table aria-label="Цена продажи и маржа за единицу">
-                <thead><tr><th scope="col">Ед.</th><th scope="col">Без отсрочки</th><th scope="col">С отсрочкой</th><th scope="col">Маржа</th></tr></thead>
+              <table aria-label="Цена продажи и прибыль за единицу">
+                <thead><tr><th scope="col">Ед.</th><th scope="col">Без отсрочки</th><th scope="col">С отсрочкой</th><th scope="col">Прибыль за ед.</th></tr></thead>
                 <tbody>
                   <tr><th scope="row">₽/л</th><td id="sale-before-l">—</td><td id="sale-after-l">—</td><td id="sale-margin-l">—</td></tr>
                   <tr><th scope="row">₽/кг</th><td id="sale-before-kg">—</td><td id="sale-after-kg">—</td><td id="sale-margin-kg">—</td></tr>
@@ -425,8 +432,8 @@
               <dl class="breakdown">
                 <div><dt>Сумма продажи без отсрочки</dt><dd id="sale-total-before">—</dd></div>
                 <div><dt>Сумма продажи с отсрочкой</dt><dd id="sale-total">—</dd></div>
-                <div><dt>Прибыль за рейс без НДС</dt><dd id="sale-profit">—</dd></div>
-                <div><dt>Маржа без отсрочки, %</dt><dd id="sale-margin">—</dd></div>
+                <div><dt>Прибыль после доставки и отсрочки, без НДС</dt><dd id="sale-profit">—</dd></div>
+                <div><dt>Маржа после доставки, %</dt><dd id="sale-margin">—</dd></div>
               </dl>
             </section>
           </div>
@@ -470,6 +477,20 @@
               <p class="hint" id="export-hint"></p>
               <p class="hint" id="export-check"></p>
             </div>
+            <details class="sheet-preview" id="sheet-preview" hidden>
+              <summary>Предпросмотр строки</summary>
+              <dl class="breakdown">
+                <div><dt>Лист</dt><dd id="sheet-preview-name"></dd></div>
+                <div id="sheet-preview-client-field" hidden><dt>Клиент</dt><dd id="sheet-preview-client"></dd></div>
+                <div><dt>Объём</dt><dd id="sheet-preview-amount">—</dd></div>
+                <div><dt>Отсрочка, дни и сумма</dt><dd id="sheet-preview-credit">—</dd></div>
+                <div><dt>Цена продажи с отсрочкой</dt><dd id="sheet-preview-sale-unit">—</dd></div>
+                <div><dt>Выручка</dt><dd id="sheet-preview-sale-total">—</dd></div>
+                <div><dt>Продажа минус закупка за единицу</dt><dd id="sheet-preview-spread-unit">—</dd></div>
+                <div><dt>Маржа в листе, %</dt><dd id="sheet-preview-margin">—</dd></div>
+                <div><dt>Прибыль в листе без НДС 22%</dt><dd id="sheet-preview-profit">—</dd></div>
+              </dl>
+            </details>
             <button type="button" id="copy-journal">Скопировать строку для Google Таблиц</button>
             <p class="hint" id="journal-status" role="status">Вставьте строку в колонку A первой свободной строки журнала.</p>
             <textarea id="journal-row" aria-label="Данные для вставки" rows="2" readonly hidden></textarea>
@@ -618,6 +639,8 @@
     const byId = id => document.getElementById(id);
     const units = ['t', 'kg', 'l'];
     const unitLabels = {t: 'т', kg: 'кг', l: 'л'};
+    const sheetVatRate = 22;
+    const sheetDailyCreditRate = 0.04;
     const creditInputs = {kg: 'credit-kg', l: 'credit-l', t: 'credit-t', trip: 'credit-trip', annual: 'credit-rate'};
     const saleInputs = {
       markup: 'markup-value', 'price-liter': 'sale-price-liter', price: 'sale-price', margin: 'margin-percent'
@@ -805,7 +828,7 @@
       sheetValues = {
         ready: !invalid.size && Number.isFinite(total) && (!saleEntered || Number.isFinite(saleTotal)),
         load, quantityUnit, price, priceUnit, density: validDensity ? density : NaN,
-        fuel, freight, creditDays, creditMode, creditRate,
+        fuel, freight, creditCost, creditDays, creditMode, creditRate,
         creditFuelOnly: byId('credit-base').value === 'fuel',
         saleTotal
       };
@@ -871,6 +894,40 @@
       else hint.textContent = 'Вставьте всю строку с колонки A в свободной строке выбранного листа.';
       byId('export-check').textContent = Number.isFinite(sheetValues.saleTotal) ? ''
         : 'Цена продажи останется пустой. Чтобы заполнить её, укажите цену или маржу.';
+      updateSheetPreview();
+    }
+
+    function updateSheetPreview() {
+      const preview = byId('sheet-preview');
+      preview.hidden = byId('copy-journal').disabled;
+      if (preview.hidden) return;
+      const field = byId('export-template');
+      const client = byId('journal-reference').value.trim();
+      const {load, fuel, freight, creditCost, creditDays, saleTotal} = sheetValues;
+      const unit = sheetUnit();
+      const amount = load[unit];
+      const unitLabel = unitLabels[unit];
+      const priceSuffix = ' ₽/' + unitLabel;
+      const difference = saleTotal - fuel;
+      byId('sheet-preview-name').textContent = field.options[field.selectedIndex].textContent;
+      byId('sheet-preview-client-field').hidden = !client;
+      byId('sheet-preview-client').textContent = client;
+      byId('sheet-preview-amount').textContent = quoteQuantity.format(amount) + ' ' + unitLabel;
+      byId('sheet-preview-credit').textContent = creditDays + ' дн. · ' + formatter.format(creditCost) + ' ₽';
+      showAmount('sheet-preview-sale-unit', saleTotal / amount, priceSuffix);
+      showAmount('sheet-preview-sale-total', saleTotal, ' ₽');
+      showAmount('sheet-preview-spread-unit', difference / amount, priceSuffix);
+      showAmount('sheet-preview-margin', saleTotal > 0 ? difference / saleTotal * 100 : NaN, ' %');
+      showAmount('sheet-preview-profit', (difference - freight - creditCost) / (1 + sheetVatRate / 100), ' ₽');
+    }
+
+    function applySheetTerms() {
+      const unit = sheetUnit();
+      byId('credit-mode').value = unit;
+      byId(creditInputs[unit]).value = journalNumber.format(sheetDailyCreditRate);
+      byId('vat-rate').value = String(sheetVatRate);
+      noteParameterChange();
+      calculate();
     }
 
     function buildSheetRow(template) {
@@ -927,7 +984,7 @@
       const difference = '(' + num('Q') + '-' + num('J') + ')';
       formula('R', 'IF(' + totals + ';' + difference + '/' + quantity + ';"")');
       formula('S', 'IF(AND(' + totals + ';' + num('Q') + '<>0);' + difference + '/' + num('Q') + ';"")');
-      formula('T', 'IF(' + totals + ';(' + difference + '-' + num('K') + '-' + num('N') + ')*100/122;"")');
+      formula('T', 'IF(' + totals + ';(' + difference + '-' + num('K') + '-' + num('N') + ')*100/' + (100 + sheetVatRate) + ';"")');
       if (roman) put('W', byId('export-crm').value);
       return row.join('\t');
     }
@@ -1051,6 +1108,8 @@
     form.addEventListener('input', calculate);
     form.addEventListener('change', calculate);
     byId('copy-journal').addEventListener('click', copyJournalRow);
+    byId('apply-sheet-terms').addEventListener('click', applySheetTerms);
+    byId('journal-reference').addEventListener('input', updateSheetPreview);
     for (const id of ['export-template', 'export-unit']) {
       byId(id).addEventListener('change', updateSheetExport);
     }
