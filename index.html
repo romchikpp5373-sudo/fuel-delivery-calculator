@@ -91,11 +91,20 @@
     .quote-requisites { margin-top: 18px; padding-top: 12px; border-top: 1px solid var(--line); break-inside: avoid; }
     .quote-requisites h3 { margin: 0; font-size: 16px; }
     @media print {
-      @page { size: A4; margin: 16mm; }
-      body:has(.quote-panel[open] .quote-sheet.preview), body:has(.quote-panel[open] .quote-sheet.preview) main { margin: 0; padding: 0; background: white; color: black; }
+      /* Reserve document padding inside the page to hide browser headers and footers. */
+      @page { size: A4; margin: 0; }
+      html:has(.quote-panel[open] .quote-sheet.preview), body:has(.quote-panel[open] .quote-sheet.preview), body:has(.quote-panel[open] .quote-sheet.preview) main { margin: 0; padding: 0; background: white; color: black; }
       body:has(.quote-panel[open] .quote-sheet.preview) :is(.top, .hero, .panels, .quote-panel > summary, .quote-panel > form) { display: none !important; }
       body:has(.quote-panel[open] .quote-sheet.preview) :is(.calculator, .quote-panel) { width: auto; margin: 0; padding: 0; border: 0; box-shadow: none; }
-      .quote-sheet.preview { width: auto; max-width: none; margin: 0; padding: 0; border: 0; }
+      .quote-sheet.preview {
+        width: auto;
+        max-width: none;
+        margin: 0;
+        padding: 16mm;
+        border: 0;
+        -webkit-box-decoration-break: clone;
+        box-decoration-break: clone;
+      }
       .quote-sheet table { break-inside: avoid; }
       .quote-sheet { print-color-adjust: exact; -webkit-print-color-adjust: exact; }
     }
