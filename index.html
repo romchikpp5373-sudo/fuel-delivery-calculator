@@ -67,14 +67,23 @@
     .quote-actions button:disabled { opacity: .55; cursor: default; }
     .quote-sheet { display: none; }
     .quote-sheet.preview { display: block; max-width: 760px; margin: 24px auto 0; padding: clamp(16px, 4vw, 38px); background: white; border: 1px solid var(--line); }
-    .quote-sheet img { display: block; width: min(255px, 100%); margin-bottom: 18px; }
-    .quote-sheet h2 { margin-bottom: 10px; }
-    .quote-sheet p { margin-top: 8px; line-height: 1.5; overflow-wrap: anywhere; }
-    .quote-sheet table { margin-top: 18px; }
-    .quote-sheet table th, .quote-sheet table td { padding: 9px 5px; }
+    .quote-brand { display: flex; align-items: center; justify-content: space-between; gap: 20px; padding-bottom: 15px; margin-bottom: 20px; border-bottom: 1px solid var(--gold); break-inside: avoid; }
+    .quote-brand img { display: block; flex: 0 1 auto; width: 125px; max-width: 32%; height: auto; }
+    .quote-identity { min-width: 0; text-align: right; overflow-wrap: anywhere; font-size: 12px; line-height: 1.45; color: var(--muted); }
+    .quote-identity strong { display: block; font-size: 14px; color: var(--ink); }
+    .quote-sheet h2 { margin-bottom: 9px; font-size: 29px; }
+    .quote-sheet p { margin-top: 7px; line-height: 1.45; overflow-wrap: anywhere; }
+    .quote-sheet table { margin-top: 14px; font-size: 13px; }
+    .quote-sheet table th, .quote-sheet table td { padding: 9px 8px; overflow-wrap: anywhere; }
+    .quote-sheet thead th { background: #292720; color: white; }
+    .quote-sheet tbody tr:nth-child(even) { background: #f6f2e9; }
     .quote-sheet td:last-child { font-weight: 700; }
     .quote-sheet .quote-date { color: var(--muted); }
     .quote-sheet .quote-notes { white-space: pre-wrap; }
+    .quote-sheet .quote-intro { margin-top: 14px; }
+    .quote-sheet .quote-section { margin-top: 16px; break-inside: avoid; }
+    .quote-sheet .quote-section h3 { margin: 0; font-size: 14px; color: #76551e; }
+    .quote-sheet #quote-points-out { color: var(--muted); font-size: 13px; }
     .quote-panel textarea { width: 100%; padding: 8px 10px; font: inherit; border: 1px solid #bcb4a3; border-radius: 4px; resize: vertical; }
     .quote-panel .quote-bank-label { display: flex; align-items: center; gap: 9px; min-height: 44px; margin: 0; cursor: pointer; }
     #quote-include-bank { display: inline-block; min-height: auto; width: 18px; height: 18px; margin: 0; flex: none; accent-color: var(--ink); }
@@ -87,6 +96,7 @@
       body:has(.quote-panel[open] .quote-sheet.preview) :is(.calculator, .quote-panel) { width: auto; margin: 0; padding: 0; border: 0; box-shadow: none; }
       .quote-sheet.preview { width: auto; max-width: none; margin: 0; padding: 0; border: 0; }
       .quote-sheet table { break-inside: avoid; }
+      .quote-sheet { print-color-adjust: exact; -webkit-print-color-adjust: exact; }
     }
     .with-unit { display: flex; }
     input, select {
@@ -158,7 +168,11 @@
       th, td { padding-inline: 4px; overflow-wrap: anywhere; }
       .panels table th:first-child { width: 17%; }
       .quote-sheet.preview { padding: 12px; }
-      .quote-sheet table th:first-child { width: 39%; }
+      .quote-brand { gap: 10px; }
+      .quote-identity { font-size: 10px; }
+      .quote-identity strong { font-size: 12px; }
+      .quote-sheet h2 { font-size: 21px; overflow-wrap: anywhere; }
+      .quote-sheet table th:first-child { width: 31%; }
       .quote-sheet table th, .quote-sheet table td { padding-inline: 4px; }
     }
   </style>
@@ -429,6 +443,11 @@
               </select>
             </div>
             <div class="field">
+              <label for="quote-alternate" id="quote-alternate-label">Второй объём</label>
+              <input id="quote-alternate" inputmode="decimal" autocomplete="off" aria-describedby="quote-alternate-hint">
+              <p class="hint" id="quote-alternate-hint">Для сравнения двух объёмов по одной цене.</p>
+            </div>
+            <div class="field">
               <label for="quote-vat">НДС в цене для клиента</label>
               <select id="quote-vat">
                 <option value="">Не указывать</option>
@@ -446,6 +465,10 @@
             <div class="field field-full">
               <label for="quote-contact">Контакт для клиента</label>
               <input id="quote-contact" type="text" maxlength="210">
+            </div>
+            <div class="field field-full">
+              <label for="quote-points">Паспорт качества и характеристики</label>
+              <input id="quote-points" type="text" maxlength="280">
             </div>
             <div class="field field-full">
               <label for="quote-notes">Дополнительные условия</label>
@@ -479,25 +502,40 @@
           <p class="error" id="quote-error" role="alert" hidden></p>
         </form>
         <article id="quote-sheet" class="quote-sheet" aria-labelledby="quote-title">
-          <img id="quote-logo" alt="ЦТР — Центр Топливных Решений">
+          <div class="quote-brand">
+            <img id="quote-logo" src="data:image/jpeg;base64,/9j/4AAQSkZJRgABAQEA3ADcAAD/2wBDAAIBAQEBAQIBAQECAgICAgQDAgICAgUEBAMEBgUGBgYFBgYGBwkIBgcJBwYGCAsICQoKCgoKBggLDAsKDAkKCgr/2wBDAQICAgICAgUDAwUKBwYHCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgr/wAARCACxAgEDASIAAhEBAxEB/8QAHwAAAQUBAQEBAQEAAAAAAAAAAAECAwQFBgcICQoL/8QAtRAAAgEDAwIEAwUFBAQAAAF9AQIDAAQRBRIhMUEGE1FhByJxFDKBkaEII0KxwRVS0fAkM2JyggkKFhcYGRolJicoKSo0NTY3ODk6Q0RFRkdISUpTVFVWV1hZWmNkZWZnaGlqc3R1dnd4eXqDhIWGh4iJipKTlJWWl5iZmqKjpKWmp6ipqrKztLW2t7i5usLDxMXGx8jJytLT1NXW19jZ2uHi4+Tl5ufo6erx8vP09fb3+Pn6/8QAHwEAAwEBAQEBAQEBAQAAAAAAAAECAwQFBgcICQoL/8QAtREAAgECBAQDBAcFBAQAAQJ3AAECAxEEBSExBhJBUQdhcRMiMoEIFEKRobHBCSMzUvAVYnLRChYkNOEl8RcYGRomJygpKjU2Nzg5OkNERUZHSElKU1RVVldYWVpjZGVmZ2hpanN0dXZ3eHl6goOEhYaHiImKkpOUlZaXmJmaoqOkpaanqKmqsrO0tba3uLm6wsPExcbHyMnK0tPU1dbX2Nna4uPk5ebn6Onq8vP09fb3+Pn6/9oADAMBAAIRAxEAPwD9/KKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAwfiT8Ufhv8AB7wrJ45+K/xC0PwvosMqRzav4i1aGytY3c7UVpZmVAWYgAE8ngV5yn/BRD9gUrlv24fg/wD+HM0r/wCSK+O/+Ds//lCr45/7Grw//wCnGKv5K6AP7mv+Hh/7Af8A0fF8H/8Aw5mlf/H6P+Hh/wCwH/0fF8H/APw5mlf/AB+v4ZaKAP7mv+Hh/wCwH/0fF8H/APw5mlf/AB+j/h4f+wH/ANHxfB//AMOZpX/x+v4ZaKAP7mv+Hh/7Af8A0fF8H/8Aw5mlf/H6P+Hh/wCwH/0fF8H/APw5mlf/AB+v4ZaKAP7mv+Hh/wCwH/0fF8H/APw5mlf/AB+j/h4f+wH/ANHxfB//AMOZpX/x+v4ZaKAP7mv+Hh/7Af8A0fF8H/8Aw5mlf/H6P+Hh/wCwH/0fF8H/APw5mlf/AB+v4ZaKAP7mv+Hh/wCwH/0fF8H/APw5mlf/AB+j/h4f+wH/ANHxfB//AMOZpX/x+v4ZaKAP7mv+Hh/7Af8A0fF8H/8Aw5mlf/H6bJ/wUS/YCjQu37cfwdAHUt8TdK4/8mK/hpRC/Q1+qf8Awb4f8G+fiv8A4KNeKrL9p79prSbrS/gfo1+yxW/nNDc+MLqI/Nb27INyWit8s1wrKSQ0MR3iR4AD+o34ffETwL8VfClt45+G3jXR/EWi3m77HrGg6jHd2s+1irbJYmZWwwIOCcEEdRW1WX4I8GeF/h14R03wF4I8O2OkaLo1jFZaRpWm26w29nbRIEjhjjUBURVUKFAAAAxWpQAUUUUAFFNllWIZYH8K/Ln/AIOAP+DgPwV/wTX8I3f7O37OWqWOufHLW7EFFJE1t4Rt5B8t1cryrXBUZityQeVlcbNqygH6kUV82/8ABHvxv4z+Jf8AwS/+BnxD+Ivim/1zXtc+HOm32saxql089ze3EsQeSWSRyWd2Ykkkkk19JUAFFFFABRRSMwRdxHT0oAWmpIr8qwI68d6/Fr/g4s/4ON9P/ZottY/Yb/YO8YxXXxIkjez8b+ONPm3J4VVl+a1tXXhr7n5pASLfBHMufK/Tn/gmvdXd/wD8E7vgHf391JNPcfBXwrLNNNIWeR20i2JYk8kk9+9AHt1NllES7mIAAyS3amXV3BaQST3MixxxqWd3YBQAMkn2r+dL/g40/wCDjST4zT65+wL+wN45ZfBsbTaf8RfiDpVwynX8HZLp9lIpH+h8Osky5Fxnah8oEzAH9Eo8RaGRn+2LX/wIX/Gl/wCEh0T/AKDFr/4EL/jX8DYzjmigD++T/hIdE/6DFr/4EL/jR/wkOif9Bi1/8CF/xr+BuigD++T/AISHRP8AoMWv/gQv+NH/AAkOif8AQYtf/Ahf8a/gbooA/vk/4SHRP+gxa/8AgQv+NH/CQ6J/0GLX/wACF/xr+BuigD++T/hIdE/6DFr/AOBC/wCNH/CQ6J/0GLX/AMCF/wAa/gbq5oGga54p1yz8NeGNHutS1LULqO2sdP0+3aa4uZpGCpFHGoLO7MQqqoJJIAzmgD+9hNd0maRYodVtWZjhVWZST7dauV+Rn/BvL/wbw6R+wtoum/ti/tfeH7XUPjNqFsX0PRZtk0HgyF1AwpXKvfMpIeVWIjVjGh++7/N3/B8v/wAfn7MP/XLxn/PQ6AP6BKK/gDooA/v8or+AOgdaAP7/ACiv4Nfhh+0T8fPglfR6p8G/jd4w8J3UXEVx4Z8TXVhIg9mgkUivqb9n/wD4OJP+CxH7OupQ3Xh39tXxL4ks43Bn0vx8I9chuFH8Je7V5kB9Y5Eb3oA/skor8HP2Bf8Ag9B8GeI7vT/BH/BRf4C/8I/NI7JcePfh75s9kvPytLp0peZAB95o5ZST0jA4H7XfAn9ov4I/tOfDLTfjL+z98SdL8W+GNXhWSw1jRrkSRNlQxRuhjkXOHjcK6H5XVTxQB2tFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFAH5r/8HZ//AChV8c/9jV4f/wDTjFX8ldf1qf8AB2f/AMoVfHP/AGNXh/8A9OMVfyV0Ae4fsQ/8E5P2yv8Ago34p1zwT+xr8Gv+Ey1Tw5p8d7rNv/wkGn6f9mgkk8tH3X1xCr5bjCkkdSAOa+kP+IXL/guoeR+w1/5k3wx/8sq+vP8AgyJ/5Om+OH/ZP9O/9LjX9H6fcH0oA/kE/wCIXH/gur/0Y1/5k3wx/wDLKj/iFx/4Lq/9GNf+ZN8Mf/LKv6/KKAP5A/8AiFx/4Lq/9GNf+ZN8Mf8Ayyo/4hcf+C6v/RjX/mTfDH/yyr+vyigD+QP/AIhcv+C6o/5sb/8AMm+GP/llR/xC5f8ABdTp/wAMN/8AmTvDH/yyr+vieXytue/tVfRtb0vXrGPU9I1GG6t5GYR3FvIHRtrFTgjg4II+oqeZc1gs7XP5D/8AiFx/4Lq/9GNf+ZN8Mf8Ayyo/4hcf+C6v/RjX/mTfDH/yyr+vzNFUB/IH/wAQuP8AwXV/6Ma/8yb4Y/8AllQP+DXH/gur3/Ya/wDMm+GP/llX9flFAH80f/BKn/g0t/at8bftDReI/wDgp78MJPAvw70BY7qTQbDxVp97eeJpt3y2gksJ5hbQcEyyFkkKkJEFLmaH+kjwf4M8JeAfDGm+DPBHhuy0jSNIsY7TS9L021WC3s7eNAiRRxoAsaKoChVAAAAAwBWpWX448a+E/hv4O1T4gePPE1houi6LYy3uravql0sNtZ28al5JpZGIVEVQSWJAAFAB418b+D/hv4S1Px54/wDE9houi6NYS3uratql0kFvZ28al5JZJHIVEVQSWJwAK+Jf+CVH/BZvwr/wVb/at+O3g74J6Esfwz+F9loUPhXXLqF47zXZ7qTUBcXjowBhhP2aNYoyN+0F3wz+XH+IP/Bwh/wcIeL/APgo74xvP2Y/2Y9Vv9E+B+i3xWaaOR4bjxnPGflubhcApaqw3RW7dcLLIN+xIvp//gxu58VftKH/AKh3hP8A9GavQB/QbTWljRgjOAzdB606vzy/4OJ/+CufjP8A4JV/szaKnwb8OfaPiD8S5r7TfCmsXUayWmiC3jjae8eM582VRPH5UZUoWJZ8quyQA4X/AIL+/wDBwJ4Q/wCCbfg66/Zy/Z11XT9d+OWs2ePL3RzW/hC3kTK3dyuGVrhgymK2YchhJJ8mxZv5avHfjrxn8TfF+qfEH4ieLNQ1zXNavpLvVtY1S8ee4vJ3bc8skjks7MeSTyad468deMvid4y1P4h/EPxPfa1rutX0l5q2randNNcXdxI255JHYksxJJyfWsh/u0Af2l/8ERf+URv7O/8A2SnSP/Sda+pq+Wf+CIv/ACiN/Z3/AOyU6R/6TrX1NQAUUUUAIzqgyxr8UP8Ag4w/4OOLf9niHXP2Df2CfG0Vx4+mjlsfHnj3S7pWXwwpGySytHXOb7lw8gINsRgfvcmH0z/g6h/4K0/Hn/gn98CfCPwD/Zub+xfEfxct9US78aRyYuNHsbb7Osq2o/hnl+0hRNnMSqxT5yrp/LvdXM95cyXl1NJJLNIzyySuWZ2JySSeSSfXmgAu7281C6kvr+7knnmlaWaaaQs8jscszMeSSeSTyTX9vH/BNeeO2/4Jufs/3E0yxovwP8JlmYgAD+x7b1r+IOv7Vv2OPg14A/aF/wCCR/wY+C3xU026vPDviP4B+FbPWbOz1S4snuLc6Ra7ovOtpI5VVgNrBWAZSytlWIIB+Mv/AAcZ/wDBx3L8aJtb/YJ/YF8ebfBo3Wnj/wCI2j32DrxDYfT7GSP/AJc+AJJ1OLgEov7nc034hbkHRh+df2CD/g2h/wCCJP8AF+w/Yk/9jhrf/wAm0v8AxDQ/8ER/+jHrH/wsNb/+TaAP4+t6/wB4Ub1/vCv7Bf8AiGh/4Ij/APRj1j/4WGt//JtH/END/wAER/8Aox6x/wDCw1v/AOTaAP4+tynoaUHIyK/rS/aI/wCDcn/gjJ4K+Afjfxh4Y/YrsbXUtJ8H6ne6fc/8JZrL+VPFayPG2GvCDhgDggg45Br+S2gAoor9DP8Ag2a/Y2/Zp/bn/wCCi198FP2rPhbb+LvDEfw31LU49Lub64t1W6iubNElD28kb5CyuMbsfNyDgYAPzzLAHBNJuX1r+ws/8G1//BEg8/8ADCWkf+FVrX/ybR/xDX/8ESP+jEtJ/wDCr1r/AOTaAP5AfD2ga34s1yz8MeF9HutS1LULqO20/TrG3aWe6mkcIkcaKCzuzEKFAJJIwCa/pw/4N5f+DeXQv2GNE039rv8AbC8N2+p/GLUrLfouh3UKyQ+C4XBOFbJD3zKRvlX/AFQZo0/jd/sj9nP/AIIhf8EsP2S/ivp/xy/Z9/Y+0HQfFmk7/wCy9ak1G+vns2YbS8S3c8qJJtJAkChgCcEZOfqtVCKFUdBigBEjSMEIuMnJ96/n9/4Pl/8Aj8/Zh/65eM/56HX9Alfz9/8AB8v/AMfn7MP/AFy8Z/z0OgD8B6KKKAAgjgil2PjdsOB7V/YT/wAEyv8AgmX/AME3viF/wTg/Z+8dePP+CffwR1rXNa+CPhS/1nWNV+FGj3F1f3c2j2sks80slsXlkd2ZmdiWZmJJJNe4Xf8AwSc/4Jc31j/Ztx/wTi+BPkqGCRr8I9GUJnqRi2G0+4waAP4hQCTgCiv68P2j/wDg12/4I7ftBaHe2ukfs73Hw91a6+aHXvh/rU9nJbN6pbytJa4/2fJxjpg8j8Gf+Cy//Bvd+0b/AMEqJ/8Ahaeg63/wn3wjvLxYbXxhaWZhuNKkbGyDUIAW8osxKpKjNG5UZ8t2EdAH56gkdK+mv+CYn/BVT9p//gll8a4vij8C/EhutFvZo18WeB9Smc6drturA7XQcRzAD5LhRvjJI+ZWdG+ZWADYH4ZooA/uY/YN/bg+CX/BQ79mrQP2ovgFrjXWh65CyXFlcLtudLvI8CezuF/hljY4OMqwKuhZHVj7JX8uf/Bol/wUK1f9nX9u+4/Y78V63HD4N+MVm0Vnb3MxWO11+2jaS2kQscKZo1ltyOsjtbjPygV/UWhJXJoAWiiigAooooAKKKKACiiigAooooAKKKKAPzX/AODs/wD5Qq+Of+xq8P8A/pxir+Suv61P+Ds//lCr45/7Grw//wCnGKv5K6AP28/4Mif+Tpvjh/2T/Tv/AEuNf0fp9wfSv5wP+DIn/k6b44f9k/07/wBLjX9H6fcH0oAWiiigApCVX5iaWquo6ha6fBJeXl5HBDCheWWVgqooGSST0ApN2V2B4r/wUH/afsP2W/2bdY8bW98sevahGdO8MwspYveSqQHwO0ab5DnAOwLnLKD8x/8ABEf9rRNY0LUf2WvG+rZvNN8zUfC7zTktNA7bp7dc9SjsZRySRJIeAtfK/wDwUi/bCm/a3+O80ugXjN4R8MmSy8MR7SonXIEt2RnkyMvBwPkRARkEnxf4a/Erxh8H/HukfE3wJq0lnrGi3y3NjcLk/MOCrcjcjLlWUnDKSDwTX85Z14j1I8bQxWHlehS9yy2lFv3n+TXoj9by3g+MuG5UaqtWqe9/ha+FfddP1Z/Q2sgddyg/jUteZfsoftI+C/2qPgrpXxb8HN5QulMWpae0m57G7UDzIGOATgkENgblKtgZr02v6GwmKw+Ow0cRQlzQkk0/Jn5TWo1cPWlSqK0otpp90FFFFdBkFflb/wAHgWt65of/AASImt9J1i5tYtT+JujWuoR287ItzDsupfLkAPzrvjjbacjcinGVUj9Uq/KX/g8Z/wCURlv/ANla0X/0nvaAP5XSSe9fvf8A8GNv/I0/tKf9g7wl/wCjNYr8EK/e/wD4Mbf+Rp/aU/7B3hL/ANGaxQB/QbX4R/8AB8H/AMk1/Z1/7DniX/0Tp1fu5X4R/wDB8F/yTX9nX/sOeJf/AETptAH89dI/3aWkf7tAH9pf/BEX/lEb+zv/ANkp0j/0nWvqavln/giL/wAojf2d/wDslOkf+k619TUAFFFFAH8+P/B8H/yPH7OP/YL8U/8AozSq/B2v3i/4Pg/+R4/Zx/7Bfin/ANGaVX4O0AFf3Af8Ezf+Ucf7Pv8A2Q/wn/6Z7Wv4f6/uA/4Jm/8AKOP9n3/sh/hP/wBM9rQB7hRRRQAUUUUAee/tZf8AJr3xI/7J/rP/AKRS1/CjX9137WX/ACa98SP+yf6z/wCkUtfwo0AFfq1/wZzf8patS/7JDrH/AKWafX5S1+rX/BnN/wApatS/7JDrH/pZp9AH9S1FFFABRRRQAV/P3/wfL/8AH5+zD/1y8Z/z0Ov6BK/n7/4Pl/8Aj8/Zh/65eM/56HQB+A9FFFAH9vX/AASa/wCUW37Nf/ZAfBv/AKY7OvoKvn3/AIJNf8otv2a/+yA+Df8A0x2dfQVABXK/Gz4P/Dj9oD4Ua/8ABD4u+FrXWvDPirS5tM1zSrvPl3NvKhV1yMFTjkMpDKwBBBANdVSNtI2tQB/Ct+21+zLr/wCxp+1x8Rf2WvEl39qufAvi280lbwIVF1DHIfJnA7CSIxyAdg9eW194/wDBzTaWOn/8Fw/jvb6aqiNr7Q5G2j/lo+gac7/jvLZ/Gvg6gD0T9kP4vt+z7+1Z8NfjqrlR4O8eaTrUmGxlba8imYZ9whH41/dtEQ0ala/gJtYJ7q4W2toy8kjbY1UcsT2HqT0r+/Kwie3sYYHOWjiVSfXAoAmooooAKKKKACiiigAooooAKKKKACiiigD81/8Ag7P/AOUKvjn/ALGrw/8A+nGKv5K6/rU/4Oz/APlCr45/7Grw/wD+nGKv5K6AP28/4Mif+Tpvjh/2T/Tv/S41/R+n3B9K/nA/4Mif+Tpvjh/2T/Tv/S41/R+n3B9KAFooooAjllaPnAr8/wD/AILK/twJ4R8PyfsqfDbVR/amsW4bxddW8n/HpZsPltT6PKCCwyCI8A5Egx9RftrftT+G/wBk/wCBWp/ErU/Lm1J/9E8P6fJ/y9XzAmNSMg7FwXcjoikjnFfhr4y8XeJPH3izUPGvi/V5L7VNWvJLq+vJmy0srncSfTrjHQdBwK/H/FLjCWVYP+y8LL97VXvP+WD/AFfTy1PvuCcg+vYpYysvcg9E9nJfot38jNBYDr+ddFpvwo+IGsfC/VfjJYeHZ5PDejapb6fqGpKnyRTzK7IM+gCgMf4TJED98Vm+FfCuv+OPE2n+DPCelTX2p6peR2thZwLlpZXYKqj6k4r9rfg3+wp8PPh9+xk37KPiS0ivIdV0yQeIr2NeZ76UAtcJnoUcL5ZPIESd81+Q8HcHYriupX5HyxhF67e+17i+/fsj7ziLiKlkcad9ZSauv7qer/RH5lf8E3/20r39kL40xjxBczP4N8RPHb+I7dVyIMH93dqOu6PJ3AfeQuMFlXH7UaPrthrthFqml3UNxa3EKzWtxDIGSWNhlXUjggjkYr+f/wCPnwR8Z/s6/FrWPhF46tdt5pd2yJMq4S6hPMcyf7DoVYdxkg8g4+/P+CMP7bM2vad/wyR8S9Wke8sonm8G3c0m4y26gtJZ5zklFy6DBwgdcgRrn7zwz4orZXmEsgx7aV2oX+zNN3jr0dtPO/c+Z40yWjjMKs1wmui5rdV0ku7XXyP0SByM0VHE+EVdvapM1/QR+VhX5S/8HjP/ACiMt/8AsrWi/wDpPe1+rVflL/weM/8AKIy3/wCytaL/AOk97QB/K7X73/8ABjb/AMjT+0p/2DvCX/ozWK/BCv3v/wCDG3/kaf2lP+wd4S/9GaxQB/QbX4R/8HwX/JNf2df+w54l/wDROm1+7lfhH/wfBf8AJNf2df8AsOeJf/ROm0Afz10j/dpaR/u0Af2l/wDBEX/lEb+zv/2SnSP/AEnWvqavln/giL/yiN/Z3/7JTpH/AKTrX1NQAUUUUAfz4/8AB8H/AMjx+zj/ANgvxT/6M0qvwdr94v8Ag+D/AOR4/Zx/7Bfin/0ZpVfg7QAV/cB/wTN/5Rx/s+/9kP8ACf8A6Z7Wv4f6/uA/4Jm/8o4/2ff+yH+E/wD0z2tAHuFFFFABRRRQB57+1l/ya98SP+yf6z/6RS1/CjX9137WX/Jr3xI/7J/rP/pFLX8KNABX6tf8Gc3/AClq1L/skOsf+lmn1+Utfq1/wZzf8patS/7JDrH/AKWafQB/UtRRRQAUUUUAFfz9/wDB8v8A8fn7MP8A1y8Z/wA9Dr+gSv5+/wDg+X/4/P2Yf+uXjP8AnodAH4D0UUUAf29f8Emv+UW37Nf/AGQHwb/6Y7OvoKvn3/gk1/yi2/Zr/wCyA+Df/THZ19ANMijLeuKAHVX1Gdba3M7yLGqglpGOAoAJyafcXttawtcXEyoka7pGY4Cr6nNfhN/wcUf8HH3wptvhP4h/YN/YG+IVt4k1fxPaS6b49+IGi3HmWel2LjbNZWUw+WeeVN0bypujjR2CsZGzCAfjT/wVm/aa0H9sT/gpH8Zv2jPCc5n0bxF43uhoVy3Hn2FvttbWXHbfBBG2Ocbsdq+d6dIQzlhTaAPZ/wDgnP8ACOT48/t9fBj4Orp73UfiH4naJZ3UMcZbNu17F5zEegjDsewAJPFf3Jx/cX6V/Mf/AMGd/wCwlrHxn/bf1r9tfXdOX/hHfhLpEltpVxNE2LjWr+FoVVCRg+VatcM3OQ0sOOGzX9OKAqgBH5UALRRRQAUUUUAFFFFABRRRQAUUUUAFFFFAH5r/APB2f/yhV8c/9jV4f/8ATjFX8ldf1qf8HZ//AChV8c/9jV4f/wDTjFX8ldAH7ef8GRP/ACdN8cP+yf6d/wClxr+j9PuD6V/OB/wZE/8AJ03xw/7J/p3/AKXGv6P0+4PpQAtRz3CQruaQLgZb2FSN05r5x/4KkfH+f9n39kfXdT0S/S31jxGy6Ho7H7wecMJHXkfMsKysG6Btp56Hz80zCjlWX1cXV+GEXJ/LodODwtTHYuGHp7zaS+Z+bP8AwUz/AGsZ/wBqL9ou9XQNQaTwp4XeXTvD0KOGjmIf99dgjg+a4yCD9xU4zzXzqpA496coAXAH6V71/wAE7/2Pr79rr49W2jaxazL4U0Mx3nie6VSoaLd8lsHByHlbK8EEIJGHK1/HUpZnxbn9171WtL7r9fJRX3JH9BxjgcgyvXSnTX32/Vv77n1Z/wAEaP2HhpVgP2t/ibo+Lq6jaLwTa3EYLRQEbZL3HZn+aNOnyb25Drj7c/aE+NXhj9n74L+Ifi/4qkX7LomnvMsG/BuJvuxQj3eQqg/3q6rSdNsNB06HSdKs44LW2hWK3t4VCpFGoAVVA4AAHAHpX5U/8Fhv20YfjD8RF/Z1+H+pb/DvhS8Z9YuIZDtvdSXK44PKQ5Kjjlyx52qT/RuMrZf4a8I8lL+Ja0erlUa39E9fJK3U/IMPDF8Y59zVPhbu/wC7BPb16ep9D/t1/s4+E/8AgoT+y/ov7THwQsfO8TWeii+0uOFlMt9bEFprB9oOZkbcFXtIGTjeSPyy8IeLfE/w38Y6f408LahNp+r6NfR3NjcxKPMhmjYMpAbgkEDhuD0PBNfaP/BHb9tqH4W+Lm/Zk+IuqMmh+I7zf4buJpP3dlft1h6ZCzHAHOA4Axlyapf8Fhf2L1+EPxFX9ov4eaIsXhrxVdldYhhAVbLVGDMWwOiTYZ84wHD5OGUV+X8S4enxNk9LibAK1WFo1orRqS+35LbXt6M+2yWtVyXMZ5Li9acrum3s094/NbeZ+jn7KP7QWiftO/AzQfi/o3lwtqVqF1CzSQN9lu0+WaI9+HBIzyVKt/FXpUee9fl7/wAEK/jy+hfEbxJ+zxqd4gtdatf7X0tZGH/H1EFSVV9S0RRvpAfev1CjORnFft3Bme/6w8P0cXJ+/bln/iWj+/deTR+bcQZX/ZGbVMOtt16PYdX5S/8AB4z/AMojLf8A7K1ov/pPe1+rVflL/wAHjP8AyiMt/wDsrWi/+k97X1R4p/K7X73/APBjb/yNP7Sn/YO8Jf8AozWK/BCv3v8A+DG3/kaf2lP+wd4S/wDRmsUAf0G1+Ef/AAfBf8k1/Z1/7DniX/0Tptfu5X4R/wDB8F/yTX9nX/sOeJf/AETptAH89dI/3aWkf7tAH9pf/BEX/lEb+zv/ANkp0j/0nWvqavln/giL/wAojf2d/wDslOkf+k619TUAFFFFAH8+P/B8H/yPH7OP/YL8U/8AozSq/B2v3i/4Pg/+R4/Zx/7Bfin/ANGaVX4O0AFf3Af8Ezf+Ucf7Pv8A2Q/wn/6Z7Wv4f6/uA/4Jm/8AKOP9n3/sh/hP/wBM9rQB7hRRRQAUUUUAee/tZf8AJr3xI/7J/rP/AKRS1/CjX9137WX/ACa98SP+yf6z/wCkUtfwo0AFfq1/wZzf8patS/7JDrH/AKWafX5S1+rX/BnN/wApatS/7JDrH/pZp9AH9S1FFFABRRRQAV/P3/wfL/8AH5+zD/1y8Z/z0Ov6BK/n7/4Pl/8Aj8/Zh/65eM/56HQB+A9FFFAH298Jv+Djr/gs38Dfhb4a+Cvwt/bI/svwz4P8P2eieHdN/wCFeeHZ/sljaQJBbw+ZNp7ySbYo0Xc7MzYyxJJJ3Lv/AIOgP+C6F5C0M37c0gVupi+HHhqNvzXTQf1r4FooA9+/aa/4Kn/8FFP2xtKfw7+0l+2H448TaTI++XQ5dXNtp8jdma0txHAxHYlCRk4xk14G8kj/AH2z3ptPggluZVghjZnY4VVUkk9hgUAMr1r9iv8AYu+Pf7e37Qug/s1/s8eDJtV17W7kCaZlK2+m2oI868uZOkcMSncx5J4VQzMqn6w/4Jv/APBtZ/wUV/b8v7HxZ4h8DTfCn4fzS/vvF/juxkt5plGCfslg22e4J3Da5EcLYb97kYr+ln/gmz/wSj/ZG/4JdfCOT4Z/s0+En/tDUlQ+KPGWsbJtW12Rd20zyqqgRoWbZCirGm5iF3MzMAbv/BNj9gn4Xf8ABNj9k3wz+yr8J4vOt9ItjPrmsyRlZtZ1SXBub2Tk4LsMKvOyNY0BIWvfKKKACiiigAooooAKKKKACiiigAooooAKKKKAPzX/AODs/wD5Qq+Of+xq8P8A/pxir+Suv61P+Ds//lCr45/7Grw//wCnGKv5K6AP28/4Mif+Tpvjh/2T/Tv/AEuNf0fp9wfSv5wP+DIn/k6b44f9k/07/wBLjX9H6fcH0oAH+4c+lfmP/wAF7viLJd+NfAPwlichbHTbnVrpQ33jNIsMf5CGX/vuv04cZUivyw/4Ly+CNS0743+C/iNKP9D1XwvJp0bekltcPI2f+A3SfkfQ1+e+KE6seDa/J3jf05l/kfVcFxpy4ipc/nb1sfCB27cucDGTj2Gf6V+3P/BNf9mWD9mj9mHRdL1GxjTXtfhXVvEMix4bzpVykRz/AM849qY6bgx71+Qv7K/gm2+I37S/gLwPqNmtxa6j4u0+G8gkXKvD9oQyAj02Bq/fYtHb27MWCoqZPsMV8B4NZTRqVMRmc/sWhG/S9nJ/dZJ9rn1HiFjqkY0cHF6S95+etkvvPln/AIKo/tpr+y78HV8GeB9Q2+MvFkclvpskTfPp1rjEt3j1/gTp87bhnYRX45s7OcyOzZYn5myc+v1r1H9tD9oXUv2n/wBovxF8Tbm7kbTzeNaeH4Gbi3sIyViUehYEucfxSN615cBjnNfB8d8T1eJM8nNP91TvGC8ur+b1+SPquF8lp5Plsb/HO0pP1Wi+QsUklvKtxbuySRtlGU8g+1fq3+xz8avDf/BSb9jPXv2evi5qMb+KbDTRY6pdPGrSSDn7LqKKxO51dAWP/PRCeA4FflGeletfsNftB3X7M/7TXhv4jSaj5GlS3S2HiJSu5WsJmVJCQOTs+WQAdWjXrWXBOff2Lmyp19aFb3KkXs0+vyv9zZfEmV/2jgeenpVp+9B9U462+f8AkzS/Y2l1z4Gft+eCdH16BrXUNL8eJomoRtwY3llaylB9h5jj6A1+5lspVME1+Uf7RnwhYf8ABZ3QtL0a3j+z694u0LXIxDjmICJ53+paGVvyPev1ctvuda/bfC/B1MtjmGDbvGnWaT9Fb8kj824zxEMY8JibWlOnd/eySvyl/wCDxn/lEZb/APZWtF/9J72v1ar8pf8Ag8Z/5RGW/wD2VrRf/Se9r9VPiT+V2v3v/wCDG3/kaf2lP+wd4S/9GaxX4IV+9/8AwY2/8jT+0p/2DvCX/ozWKAP6Da/CP/g+C/5Jr+zr/wBhzxL/AOidNr93K/CP/g+C/wCSa/s6/wDYc8S/+idNoA/nrpH+7S0jnC5NAH9pf/BEX/lEb+zv/wBkp0j/ANJ1r6mr5Z/4Ii/8ojf2d/8AslOkf+k619TUAFFFFAH8+P8AwfB/8jx+zj/2C/FP/ozSq/B2v3h/4PgyD45/ZxAP/ML8U/8AozSq/B45xxQAV/cB/wAEzf8AlHH+z7/2Q/wn/wCme1r+H7DM3yg+3vX9sP8AwTR+IvhOL9iT9nn4Wt4itv7em/Z78M6nHpavmb7HHpljE0xHZd8qKCevOM4OM6lSnSScna+nz7epUYyl8KufSFFNQkrzTq0JCiiigDz39rL/AJNe+JH/AGT/AFn/ANIpa/hRr+679rL/AJNe+JH/AGT/AFn/ANIpa/hRoAK/Vr/gzm/5S1al/wBkh1j/ANLNPr8pSccmv1Z/4M6Dj/grTqXOP+LQ6x/6WafQB/UvRSKSRnNLQAUUUUAFfz9/8Hy//H5+zD/1y8Z/z0Ov6BK/n7/4Pl/+Pz9mH/rl4z/nodAH4D0UUe+KAP6LP2JP+DRj/gm9+0v+xn8I/wBovxt8a/jdZ614++GOgeJNYtNJ8SaPHawXV9p0F1KkKyaU7rGHlYKGdmCgZYnJr1D/AIgqv+CW45/4X58fv/Cq0T/5T19+f8EnCf8Ah1t+zWB/0QHwb/6Y7OvoRc45oA/KXwB/wZ0f8EkPBtwtx4i1D4reLFD7jD4g8aW8anpx/oNpbnH45r7M/ZT/AOCSv/BOf9ib7Dd/s1/sg+DdB1LT2L2niC40/wC36rG56sL+7MtyO/SQAZ4Ar6OooAaI1xyi/lTgAOgoooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKAPzX/AODs/wD5Qq+Of+xq8P8A/pxir+Suv61P+Ds//lCr45/7Grw//wCnGKv5K6AP28/4Mif+Tpvjh/2T/Tv/AEuNf0fp9wfSv5wP+DIn/k6b44f9k/07/wBLjX9H6fcH0oAVvumvlX/grb+zZffH39lq51rw5p8lzrng25/texhhxvmhC7biMf8AbP8AeADkmJQM5wfqo1FLAJRiSMN9a83OMto5xltXBVfhqRa/yfyep1YHGVMvxlPEU94u/wDn960P5+f2cfHlj8Lfj/4K+ImpztHa6L4osbu8kVTxCk6GTj/czX7fftQ6prE37KnxA1bwVcM163gHVJdLns23MZDZyFGjK9T0K474r83P+Cof/BOfVPgR4qvfjl8HPDUlx4J1KZp9RsLOHP8AYcpOSNo4EDEkqQMKRtOPlz9E/wDBJf8Abl0P4v8Aw1tv2a/ilrcY8VaDZ/Z9La6Yf8TaxUYULwAZI1IQr95l2vz82Pxfgd1uGczxfDuYe5KrrCT2btbT1VmvNNH6JxNKnnGDoZzhVzKHxLqle+vpr95+VCfe3EY3DNOr2T9uf9lPxH+yX8ddS8IXGnTf8I7qE8l14T1FlytxZliQm4HG+POxh8p4DbcOpPjbZU4YV+I5hgcRlmOqYWurTg2mvTr6PdH6VhcVRxmHjXpO8ZK6+fT5bAelN3bPmK5xzj19v896MgjivTv2T/2YviV+1P8AFmx8B+ANGWSGKVJtW1O6hZrSxgz9+UjGc9owwZ+QvdlMDhcRjcZChRi5Tk0klvdtDxWIpYWhKrUkopJ6vbY++f2LPh3qfx//AG6fEH7TPiiOO60/4f8AhzTfD+kzMxIGrDT4o7oLjqYy1yGz0M64z2+84F2ptJzzXG/Af4KeE/gF8NdN+Gfgq0YWljGWmupSDLd3DndLPIf4nd8sT74GAAB2iDHav7I4bymWUZfyVP4k25zf9+Tu/ktEvQ/nnNscsfi+aPwRSjFf3Vt83ux1flL/AMHjP/KIy3/7K1ov/pPe1+rVflL/AMHjP/KIy3/7K1ov/pPe19AeYfyu1+9//Bjb/wAjT+0p/wBg7wl/6M1ivwQr97/+DG3/AJGn9pT/ALB3hL/0ZrFAH9BtfhH/AMHwX/JNf2df+w54l/8AROm1+7lfhH/wfBf8k1/Z1/7DniX/ANE6bQB/PXQwJGAaKKAP2V/Yr/4O7/Ef7HP7Jnw9/ZYs/wBgqx8QReAfCtposetSfEp7Zr0QRhPNMQ09xHuxnbubHqa9P/4jg/Fn/SNrT/8Aw7En/wArK/BuigD95P8AiOD8Wf8ASNrT/wDw7En/AMrKP+I4PxZ/0ja0/wD8OxJ/8rK/BuigD7o/4LY/8FrtV/4LJa18OdZ1P9nK3+Hp+H9rqkMcdv4qbVPt32xrViSTbQeXs+zf7W7f2xz8LFgD8x4peT0r7X/4Jwf8E49L+IWk2P7U37UmjyL4HWZz4S8KvI0M/i64jON7FcNFp8cmBLICrzENDCwZZZYOHMsywWU4GeKxU1GEVq/0XdvsdODwmIx2JjQoR5pS2Qv/AATd/wCCcmmePdP0/wDap/al0OQ+BUud/hTwfI8kU3jKeORlJYoVaLTo3TbLKrpJK2YoDkTSwfuH/wAEVvFWt+Nf20fEGteILpZJR8M57eGOKFIore3iu9PjhgjRAFjijjVURFAVVGAAOK+LPEev6p4r1FtS1cxfLBHb29rbwrHBa28cYjit4Y1wscMcSrGkagKiqFUBQK+wv+CFpx+114gP/VO7z/0vsK/n6jxpjOKuO8HvGjGouWP6vu39y27n6rU4dw2RcL4j7VRw96X6Lsvxf3H6zLwKKRGDLxS1/R62PyEKKKKAPPf2sv8Ak174kf8AZP8AWf8A0ilr+FGv7rv2sv8Ak174kf8AZP8AWf8A0ilr+FvRdC1rxPrFr4d8N6Vc6hqF9cR29jY2MLSzXMzsFSKNEBZ3ZiFCqCSTgUAGhaHrXifWbXw74b0m6v8AUL64S3sbGxt2lmuJnYKkcaLlnckgBQCSSAOa/oM/4Nh/+Cfnhr9jn9pm91n4l3K6j8WNY8B3a6xBa3Ia08K23n2zHTsods94zBTNICUiKLEm4+Yx+Tf2Hv2H9E/YR0ZfHHjaC11H40X1uyTXkMiSReCInXa9tbsuVfUGGRLcL/qATFGd5kkH6L/8EQwR+2PeZH/Mk33/AKOtq/Lc14/pVuKMNk+XNNOpFVJ9POMf1fyXVn2+C4VnTyWtmGLVmotwjs/8T/RfNn64xE4Vf7ox+lSVHF1/z6VJX6kfEBRRRQAV/P3/AMHy/wDx+fsw/wDXLxn/AD0Ov6BK/n9/4PlUL3v7MOP+eXjP+eh0AfgOi72219Of8E9/+CeeqftX6tcfE34n397oHwr8P3gi1zWrdVW61a5AVhpmn7gytcsp3PIwMcEfzvlmiild/wAE9f8Agnnq/wC1Vq0vxS+Ktzd6D8KdAvUh1vWrXYLrWLjG/wDszTg4Ie4ZOXm2tHbKyvICzRRS/pTfX2mR6RpPhDwj4bs9B8NeHbEWXhnw3pilbXS7bcWKJkkszOzySSMS8sju7lmYmvznjvjzD8M4d4bDtSxMloukF3l59l13eh9fwvwvVzqr7WsmqKer6y8l+r6H7xfsW6X4d0L9kP4V6R4M8OW+j6Pa/DfQ4dJ0e1kkkjsbVdPhWKBXlZndUQKoZ2LEKCxJyT6iOBivM/2OP+TSfhb/ANk50T/0ghr0yvusvqTq4GlOTu3GLfq0mz5bExjTxU4x2TaQUUUV2GIUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFAH5r/wDB2f8A8oVfHP8A2NXh/wD9OMVfyVjr8w4r+tX/AIOzE3/8EVvHQ/6mjw+f/KjFX5B/8G+X/Bvb4p/4KI+J7H9pz9qfR9Q0b4H6Vek2lvuMFx4yuY5MNbQnIeO0VlZZrgYJIMUR3+ZJAAfV/wDwZbfsj/HTwTL8UP2vvFXgm40zwP4q0i10LwzqV58p1W4guGkneFerRRnCGT7pfcgJaNwv75r90fSs7wf4P8M+APDFh4K8FeH7HSdH0qzitNL0vTLNLe3s7eNAkcUcaAKiKoACgAADAwOKZ458b+Evhp4N1T4hePvEun6LoeiWEt9rGr6teJb2tlbRIXkmllchY40UFmZiAACTQBq0V8rJ/wAFwf8AgkW6Bj/wUQ+FK57HxbBx+tL/AMPv/wDgkV/0kS+FH/hWwf40AfTeo6XYatYzaVqVnHcW1zG0dxbzxh0kRgQyspyCCDyDwa+Hv2mv+CM/hnWfELfFT9krxk/grXLeZruDSXkkFqLjduVreWM+baHO7hQ6jOFCCvRv+H3/APwSK/6SJfCj/wAK2D/Gj/h9/wD8Eiv+kiXwo/8ACtg/xrxc44fyrPqKp42nzW1TV1KL7xktUehl+Z43LKjnh52vut0/VbM8g8Q6p+1xqXgFPgT/AMFCP2KNU+JGh+aPsvi/wKIrnULfapxOEhPEuf4/3OVOCrZ5+dvFf/BMjxF4s1zZ+zrZePJLe4kP2fTfHXgO806W3XsrXQRoHIHBY+WP1r7o/wCH3/8AwSK/6SJfCj/wrYP8aP8Ah9//AMEiv+kiXwo/8K2D/Gvl8f4e4HNIxji60p8u0mlzpdnNW5kunMm/M9rC8V4vBXeHgo31aXwN9+V3Sf8AhaPlv4Hf8ELfitr2oR33x+8f2GhaekimTTdDb7VdTLn5l80gRx8Yw2H5zlcYz+h3wE/Z4+FH7N3giPwB8JfCcOl2Kt5lxJ9+e6l7yzSH5pGPvwBwoVQFHiv/AA+//wCCRX/SRL4Uf+FbB/jR/wAPv/8AgkV/0kS+FH/hWwf417XD/B2Q8N64Ol773k3eX39Pkkedmmf5pnGmIqXivsrSP3H1OowoApa+V/8Ah9//AMEiv+kiXwo/8K2D/Gj/AIff/wDBIr/pIl8KP/Ctg/xr6g8Y+qK/KX/g8Z/5RGW//ZWtF/8ASe9r6y/4ff8A/BIr/pIl8KP/AArYP8a/N3/g6V/4KU/sEftX/wDBMqH4W/s3ftaeBvGviJfiVpN7/Y/h3Xo7m4+zxw3avLsU52qXUE+rUAfzm1+9/wDwY2/8jT+0p/2DvCX/AKM1ivwQr97/APgxt/5Gn9pT/sHeEv8A0ZrFAH9Btfk7/wAHTP8AwTI/bW/4KT+C/gzov7G3wkh8V3HhLVNbn16OXxDYaf8AZkuI7IRHN5NEH3GFxhSSMc9a/WKigD+Rf/iFp/4Lhf8ARn1r/wCHG8P/APydR/xC0/8ABcL/AKM+tf8Aw43h/wD+Tq/roooA/kX/AOIWn/guF/0Z9a/+HG8P/wDydR/xC0/8Fwv+jPrX/wAON4f/APk6v66KKAP5F/8AiFp/4Lhf9GfWv/hxvD//AMnUn/ELT/wXBHJ/Y+tP/DjeH/8A5Or+ummy9BQB/KF8H/8AggJ8fP2UvGdp8UP+CnXwxi0TQ4WY+G/A9n4is72TxPeJjKTS2U0otrSLcjSncssmRHFtLmaL6X8R+I9S8VaqdX1YxqyxpBbW9tCsMFpbxqEit4Y0ASKGNFVEjQBUVVVQAMV+if8AwXy/5A/wv/6+tX/9BtK/OAhm+VFyxOAB3r+YvFbOMfiuIpYCc37Kny2itLtxTbfnrZeR+0cDZfhaOTrFRj787pt66JtWXlpd+Y1nVRksBwT+lfoP/wAEPP2eviVpHjnWP2kNZ0h7Pw7feG5tI0uS5Uq99K9xbytLEMcxKISu/OCxIBba23zX/gm1/wAE3NV/aV1C3+MHxc0+a18BWswa1t9zxya5Ip+4jDBWANndIvLEbVIO4j9atD0LSfDumW+i6Fp8NpZ2sKxWtrbxCOOKNRhVVRwAB0A4Fe14Z8D4mpiKecYxOMYvmgurfST8u3c83jTiajGjLL8PaTeknul5evft6l1M7eadSJkClr+gz8pCjOOtFBxjmgDhP2n9N1LW/wBnD4gaNotjNdXl54I1aC0tbeMvJNK9nKFRFHLMSQABkkmv5rf2H/2I9E/YU0KPxv41jt774zajblbiaNhJD4JhdcNbW7jhtQZTtmnHEGWiiJbzHH9MnxieSP4T+J5opCrJ4dvSrL1B8hzn9K/n0UkjJr8i8VuJswyfB0sFhHy+2UuaS3sraJ9L31e9tj7zgXJ8LmOInia6v7O1k9ru+r72tsNDYGWb86+wv+CI7qP2x7vLDnwVfY9/31vXzP8ABv4MfEb4+fEGy+Gnwu0Jr/VL5+MkrFbx55mlcA+XGvdsHsACTiv2X/Ym/Yk+Hf7H3w/XRtECah4ivo0fX/EEkO2S7kGcIo/gjXoqj0yeen5t4b8M5hmmd0sdFWpUZKTk9m10Xfz7LzPsuMM6wmBy6eFbvOomklul3fZfn6HuMXWpKYiYVQP4eKfX9TH4iFFFFAAxwua/Ib/g54/Yn0v9r/4lfs7618R/F/8AYvgPwavimXxVNYyxnUL1pjpBgsLONj/rJvIkBnYGO3RWkcMfLik/XZxncK/Nn/gvzGEvvhWe/l63k497CvluMs6xWQ8O18bh0ueNkr7JtpXt1te9j2uH8vo5nnFLDVb8rbvbyTdvnax+et5f6XHpOm+EPCPhqx0Hw3oNmtl4d8OaVHstdOtwc7VHV3ZiXkmfMksjNJIWZiaqkjFDc8e+K+v/APgmx/wTQ1P9pfUrf4w/GLT7iz8A20ubW3O5JNddTgopGCsAOQ0gOWI2r3YfylluW5vxZm3s6d51Zu8pPp3lJvZf8Mj9yxmMwGQ4DnnaMIqyS6+SX9dz9MP2N2U/sk/C0Bv+ac6J/wCkENenVQ0bRNN8PaXbaJollDa2dnAkFra28YSOGNFCqiqOAoAAAHAFXl+7X9mYOjLD4WnSe8YxX3JL9D+d61T21aVRdW2LRRRXUZhRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAeN/tz/sTfCb/goB8EYf2ePjot3N4Tl8TabqutadZzGJtRjs7hbgWrSAhkjkdFVyuH2FgpViHX0/wV4K8JfDvwjpvgPwN4X0/RtF0eyjs9J0nS7NLe2sreNQscMUaALGiqAqqoAAAArVpsjMqMyjJC8CgDN8a+N/B/w38J6l488f+JrHRdE0exlvdW1bUrlYbezt41LSSySMQqIqgksSAAK/lk/4ODf+Dg7xh/wUh8XXf7Mn7MeuahonwN0TUHWaQEwz+NJ43+S7uF+8lqpXdDbnBORJKu8IkP6Tf8F+f2Rf+C6X/BTjXZP2c/2avhPofh34G6ZcK1xBd+OLKC88WXUb7luLpRISlsjKrQ255yPMky+xIfy8P/BpR/wWhP8AzR7wf/4X1j/8XQB+Z7HJzmiv0v8A+ISf/gtD/wBEf8If+F9Y/wDxdH/EJP8A8Fof+iP+EP8AwvrH/wCLoA/NCiv0v/4hJ/8AgtD/ANEf8If+F9Y//F0f8Qk//BaH/oj/AIQ/8L6x/wDi6APzQor9L/8AiEn/AOC0P/RH/CH/AIX1j/8AF0f8Qk//AAWh/wCiP+EP/C+sf/i6APzQor9L/wDiEn/4LQ/9Ef8ACH/hfWP/AMXR/wAQk/8AwWh/6I/4Q/8AC+sf/i6APzQor9L/APiEn/4LQ/8ARH/CH/hfWP8A8XR/xCT/APBaH/oj/hD/AML6x/8Ai6APzQo3Njbnj0r9L/8AiEn/AOC0P/RH/CH/AIX1j/8AF0f8Qk//AAWh/wCiP+EP/C+sf/i6APzQr97/APgxt/5Gn9pT/sHeEv8A0ZrFfH5/4NJ/+C0P/RH/AAh/4X1j/wDFV+rf/Br5/wAEi/21f+CXWu/Ge+/a58HaPpUfjaz0GPQTpPiCC+8xrR9QM27yidnFzFjPXJ9DQB+uVFFFABRRRQAUUUUAFNl6CnUyVu1D2A/Oz/gvp/yBfhf/ANfWr/8AoNpXjn/BNn/gm7qf7Suq2/xd+L2nzWngW0uA1rbtlZNdkU4Ma/3YARhn4LfdXuy/f/7V/wCxj4d/a38eeAtR+IGoMvh/wlPfXN/pcW4PqDSiARxFx92P922/HJHAxksPatD0PSPDuk2uh6HpsNnZ2VusFpaW0YSOGNQFVFUDCqAAABwBX5fX4Dhm3GlfNMcr0ly8sf5moxTb8k1t19D7SlxRLAcO08DhdJvmvLsnJvTzae/QNC0PS/Duk2+h6Np0VraWkKxWttBGFSGNRhVUDgAAAADpV8KMZxSBMd6dX6dGMYRUYqyW3+R8Y25O7CiiiqEFDdKKD0oA5X4yk/8ACpfFH/YuX3/pO9fg78Efgn8Rf2gfiHp/ww+GGgvfanfSAekdvHn5ppW/gjUck9+gySAf3u+IuhX3ijwNrPhrTZY47jUdJubaF5s7VaSJkBOO2W59q8v/AGK/2LPh3+x58OV8N+HVW+1u+VZNf16SLbJeSY+6P7sa5IVM+pOSSa/NuMuD6vFucYNSly0aak5tb6tWS89Hr0PruHeIIZFl+Isr1JOPKuml7t+Svt1I/wBiz9ij4e/se/DtND8PwR32vXyRt4g8QSR4ku5APur/AHIlOdqD6nJJNe4Iq9lojjCJtBpwGK+9wGAwmW4SOGw0FGEVZJHzOKxWIxld1q0uaT3YAY4FFFFdhzhRRRQBHITvxntX5t/8HAPy3/wpP/TPW/52FfpJIAWzXg/7VP7E/hX9rL4r+AfFPxJu/N8PeDU1CS70aNSDqUszWpjR27RDyGLjq2QvAJNfJ8bZTi884fqYLDK85uNr7K0k236JXPb4dx1HLc4hiavwxu/vi0vx+7c+B/8Agmr/AMEzdU/aK1C1+M3xq0uaz8DW026y0+UFJNddSeOeVtwRhm6vnCkAEj9ZNE0bTNC0q30TSNNgtbS1hWK3t7eEJHEijCqqjgADgAU7SNK07SbC30rSrGK1trWFYre3gQLHEirgIoHAAHAA6VcCADAquFuFcv4XwHscPrN/HN7ya/JdkLPM8xWeYr2tTSK+GPRL/Pux20elFFFfVHihRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABTWXJyKdRQA3ZxQFI/OnUUAFFFFABRRRQAUMCRgUUUAM8s5zmlCcc06igAUEDmiiigAooooAKKKKAEIJOcCkaPPAp1FKwDVjweadRRT22AKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKAP/2Q==" alt="ЦТР — Центр Топливных Решений">
+            <div class="quote-identity">
+              <strong id="quote-supplier-name"></strong>
+              <div id="quote-supplier-ids"></div>
+              <div>centr-fuel.ru · info@centr-fuel.ru · +7 (495) 664-68-42</div>
+            </div>
+          </div>
           <h2 id="quote-title">Коммерческое предложение</h2>
-          <p class="quote-date" id="quote-issued"></p>
           <p><strong id="quote-client-out"></strong></p>
-          <p><strong id="quote-fuel-out"></strong></p>
-          <p id="quote-quantity-out"></p>
-          <p id="quote-delivery-out" hidden></p>
-          <p id="quote-delivery-date-out" hidden></p>
-          <p id="quote-valid-date-out" hidden></p>
+          <p class="quote-date" id="quote-issued"></p>
+          <p class="quote-intro">Добрый день!</p>
+          <p>Центр Топливных Решений поставляет нефтепродукты с 2016 года.</p>
+          <p><strong id="quote-fuel-out"></strong> · <span id="quote-quantity-out"></span></p>
+          <section class="quote-section" id="quote-delivery-section" hidden>
+            <h3>Условия поставки</h3>
+            <p id="quote-delivery-out" hidden></p>
+            <p id="quote-delivery-date-out" hidden></p>
+            <p id="quote-valid-date-out" hidden></p>
+          </section>
           <table>
-            <thead><tr><th scope="col">Условия оплаты</th><th scope="col" id="quote-price-title">Цена</th><th scope="col">Сумма, ₽</th></tr></thead>
+            <thead><tr><th scope="col">Условия оплаты</th><th scope="col" id="quote-price-title">Цена</th><th scope="col" id="quote-total-title">Сумма, ₽</th><th scope="col" id="quote-alt-title" hidden></th></tr></thead>
             <tbody>
-              <tr><th scope="row">100% предоплата</th><td id="quote-cash-price"></td><td id="quote-cash-total"></td></tr>
-              <tr id="quote-deferred-row" hidden><th scope="row" id="quote-deferred-title"></th><td id="quote-deferred-price"></td><td id="quote-deferred-total"></td></tr>
+              <tr><th scope="row">100% предоплата</th><td id="quote-cash-price"></td><td id="quote-cash-total"></td><td id="quote-alt-cash" hidden></td></tr>
+              <tr id="quote-deferred-row" hidden><th scope="row" id="quote-deferred-title"></th><td id="quote-deferred-price"></td><td id="quote-deferred-total"></td><td id="quote-alt-deferred" hidden></td></tr>
             </tbody>
           </table>
           <p id="quote-vat-out" hidden></p>
+          <p id="quote-points-out" hidden></p>
           <p id="quote-notes-out" class="quote-notes" hidden></p>
-          <p id="quote-contact-out" hidden></p>
+          <section class="quote-section quote-requisites" id="quote-contact-section" hidden>
+            <h3>Контакт по предложению</h3>
+            <p id="quote-contact-out"></p>
+          </section>
           <section class="quote-requisites" id="quote-requisites" aria-labelledby="quote-requisites-title" hidden>
             <h3 id="quote-requisites-title">Реквизиты поставщика</h3>
             <p id="quote-supplier-out" class="quote-notes" hidden></p>
@@ -701,6 +739,7 @@
         || (saleEntered && !Number.isFinite(saleTotal));
       quotePrices = {load, quantityUnit, saleBefore, saleTotal, creditDays, annual, fuelName};
       byId('quote-days-field').hidden = annual || !(creditDays > 0);
+      updateQuoteUnitLabel();
       byId('quote-hint').textContent = Number.isFinite(saleBefore)
         ? 'Итог в КП считается по цене за единицу, округлённой до копеек.'
         : 'Укажите цену продажи или маржу в разделе «Маржа и цена для клиента».';
@@ -754,12 +793,23 @@
       field.textContent = text ? prefix + text : '';
     }
 
+    function selectedQuoteUnit() {
+      const unit = byId('quote-unit').value;
+      return unit === 'load' ? quotePrices.quantityUnit : unit;
+    }
+
+    function updateQuoteUnitLabel() {
+      byId('quote-alternate-label').textContent = 'Второй объём, ' + unitLabels[selectedQuoteUnit()];
+    }
+
     function updateQuote() {
-      const {load, quantityUnit, saleBefore, saleTotal, creditDays, annual, fuelName} = quotePrices;
-      const choice = byId('quote-unit').value;
-      const unit = choice === 'load' ? quantityUnit : choice;
+      const {load, saleBefore, saleTotal, creditDays, annual, fuelName} = quotePrices;
+      const unit = selectedQuoteUnit();
       const amount = load[unit];
       const volume = Number.isFinite(amount) ? Number(amount.toFixed(6)) : NaN;
+      const alternateText = byId('quote-alternate').value.trim();
+      const alternate = Number(parseNumber(alternateText).toFixed(6));
+      const twoVolumes = Boolean(alternateText);
       const client = byId('quote-client').value.trim();
       const fuel = byId('quote-fuel').value.trim() || fuelName;
       const deferred = creditDays > 0;
@@ -767,6 +817,9 @@
       if (!Number.isFinite(saleBefore)) error = 'Укажите цену продажи или маржу и проверьте данные расчёта.';
       else if (!Number.isFinite(saleTotal)) error = 'Проверьте ставку и срок отсрочки.';
       else if (!(volume > 0)) error = 'Укажите плотность для пересчёта или выберите единицу загрузки.';
+      else if (twoVolumes && (!Number.isFinite(alternate) || alternate <= 0 || alternate === volume)) {
+        error = 'Укажите второй объём больше нуля и отличный от первого.';
+      }
       else if (!client || !fuel) error = 'Укажите клиента и марку топлива.';
 
       const sheet = byId('quote-sheet');
@@ -779,26 +832,46 @@
       byId('quote-client-out').textContent = client;
       byId('quote-fuel-out').textContent = fuel;
       byId('quote-issued').textContent = quoteDay.format(new Date());
-      byId('quote-quantity-out').textContent = 'Объём — ' + quoteQuantity.format(volume) + ' ' + unitLabels[unit];
+      const unitLabel = unitLabels[unit];
+      const primaryVolume = quoteQuantity.format(volume) + ' ' + unitLabel;
+      const alternateVolume = twoVolumes ? quoteQuantity.format(alternate) + ' ' + unitLabel : '';
+      byId('quote-quantity-out').textContent = twoVolumes
+        ? primaryVolume + ' или ' + alternateVolume
+        : primaryVolume;
       byId('quote-price-title').textContent = 'Цена, ₽/' + unitLabels[unit];
+      byId('quote-total-title').textContent = twoVolumes ? 'За ' + primaryVolume : 'Сумма';
+      byId('quote-alt-title').textContent = twoVolumes ? 'За ' + alternateVolume : '';
+      for (const id of ['quote-alt-title', 'quote-alt-cash', 'quote-alt-deferred']) byId(id).hidden = !twoVolumes;
       const cashPrice = Number((saleBefore / amount).toFixed(2));
       showAmount('quote-cash-price', cashPrice);
-      showAmount('quote-cash-total', cashPrice * volume);
+      showAmount('quote-cash-total', cashPrice * volume, ' ₽');
+      if (twoVolumes) showAmount('quote-alt-cash', cashPrice * alternate, ' ₽');
       byId('quote-deferred-row').hidden = !deferred;
       if (deferred) {
         const deferredPrice = Number((saleTotal / amount).toFixed(2));
         byId('quote-deferred-title').textContent = quoteTerm(creditDays, annual || byId('quote-days-kind').value === 'calendar');
         showAmount('quote-deferred-price', deferredPrice);
-        showAmount('quote-deferred-total', deferredPrice * volume);
+        showAmount('quote-deferred-total', deferredPrice * volume, ' ₽');
+        if (twoVolumes) showAmount('quote-alt-deferred', deferredPrice * alternate, ' ₽');
       }
-      optionalQuoteLine('quote-delivery-out', 'Поставка — ', byId('quote-delivery').value.trim());
-      optionalQuoteLine('quote-delivery-date-out', 'Дата поставки — ', quoteDate(byId('quote-delivery-date').value));
-      optionalQuoteLine('quote-valid-date-out', 'КП действует до ', quoteDate(byId('quote-valid-date').value));
+      const delivery = byId('quote-delivery').value.trim();
+      const deliveryDate = quoteDate(byId('quote-delivery-date').value);
+      const validDate = quoteDate(byId('quote-valid-date').value);
+      byId('quote-delivery-section').hidden = !(delivery || deliveryDate || validDate);
+      optionalQuoteLine('quote-delivery-out', '', delivery);
+      optionalQuoteLine('quote-delivery-date-out', 'Дата поставки — ', deliveryDate);
+      optionalQuoteLine('quote-valid-date-out', 'КП действует до ', validDate);
       const vat = byId('quote-vat').value;
       optionalQuoteLine('quote-vat-out', '', {included: 'НДС включён в цену.', excluded: 'Цена без НДС.'}[vat]);
       optionalQuoteLine('quote-notes-out', '', byId('quote-notes').value.trim());
-      optionalQuoteLine('quote-contact-out', 'Контакт — ', byId('quote-contact').value.trim());
-      const supplier = byId('quote-supplier').value.trim();
+      optionalQuoteLine('quote-points-out', '', byId('quote-points').value.trim());
+      const contact = byId('quote-contact').value.trim();
+      byId('quote-contact-section').hidden = !contact;
+      byId('quote-contact-out').textContent = contact;
+      const [supplierName = '', supplierIds = '', ...supplierAddress] = byId('quote-supplier').value.trim().split('\n');
+      byId('quote-supplier-name').textContent = supplierName;
+      byId('quote-supplier-ids').textContent = supplierIds;
+      const supplier = supplierAddress.join('\n').trim();
       const bank = byId('quote-include-bank').checked ? byId('quote-bank').value.trim() : '';
       optionalQuoteLine('quote-supplier-out', '', supplier);
       optionalQuoteLine('quote-bank-out', '', bank);
@@ -820,6 +893,7 @@
     quoteForm.addEventListener('submit', event => { event.preventDefault(); previewQuote(); });
     function refreshQuoteForm() {
       byId('quote-bank-field').hidden = !byId('quote-include-bank').checked;
+      updateQuoteUnitLabel();
       if (quoteRequested) updateQuote();
     }
     quoteForm.addEventListener('input', refreshQuoteForm);
@@ -827,7 +901,6 @@
     byId('quote-preview-button').addEventListener('click', previewQuote);
     byId('mobile-quote-link').addEventListener('click', () => { byId('quote-panel').open = true; });
     byId('quote-print').addEventListener('click', () => { if (updateQuote()) window.print(); });
-    byId('quote-logo').src = document.querySelector('.brand img').src;
     calculate();
   </script>
 </body>
