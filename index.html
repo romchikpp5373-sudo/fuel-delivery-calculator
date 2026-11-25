@@ -21,51 +21,52 @@
     * { box-sizing: border-box; }
     [hidden] { display: none !important; }
     body { margin: 0; }
-    .wrap { width: min(1120px, calc(100% - 48px)); margin-inline: auto; }
-    .top { background: var(--white); border-bottom: 3px solid var(--gold); }
-    .top .wrap { min-height: 80px; display: flex; align-items: center; }
-    .brand { display: inline-flex; max-width: 100%; }
-    .brand img { display: block; width: min(305px, 100%); height: auto; }
-    .hero { background: #24231f; color: var(--white); padding: 40px 0 49px; }
-    h1, h2, p { margin: 0; }
+    .wrap { width: calc(100% - clamp(20px, 3vw, 56px)); margin-inline: auto; }
+    .top { background: var(--white); border-bottom: 2px solid var(--gold); }
+    .top .wrap { min-height: 62px; display: flex; align-items: center; gap: clamp(12px, 2.4vw, 32px); }
+    .brand { display: inline-flex; flex: 0 1 174px; min-width: 64px; }
+    .brand img { display: block; width: 100%; height: auto; }
+    h1, h2, h3, p { margin: 0; }
     h1, h2 { font-family: Ubuntu, "Trebuchet MS", Arial, sans-serif; }
-    h1 { font-size: clamp(29px, 5vw, 48px); line-height: 1.1; }
-    .hero h1::after {
-      content: ""; display: block; width: 56px; height: 4px;
-      margin: 18px 0 14px; background: var(--gold);
+    h1 { font-size: clamp(20px, 2.2vw, 32px); line-height: 1.12; }
+    h2 { font-size: 22px; line-height: 1.2; margin-bottom: 12px; }
+    h3 { font-size: 15px; line-height: 1.25; }
+    .calculator { padding: 12px 0 20px; }
+    .section-nav { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 12px; }
+    .section-nav button {
+      font: inherit; font-size: 14px; font-weight: 700; color: var(--ink); background: var(--white);
+      border: 1px solid var(--line); border-radius: 5px; padding: 8px 14px; min-height: 38px; cursor: pointer;
     }
-    .hero p { color: #e5dfd2; line-height: 1.5; }
-    .calculator { margin-top: -19px; padding-bottom: 40px; }
-    .section-nav { display: none; }
-    .panels { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 22px; align-items: start; }
-    .panel {
-      min-width: 0; padding: 26px; background: var(--white); border: 1px solid var(--line);
-      border-top: 5px solid var(--gold); box-shadow: 0 10px 30px #29231910;
-    }
-    h2 { font-size: 23px; line-height: 1.2; margin-bottom: 20px; }
-    .fields { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 17px 14px; }
+    .section-nav button[aria-pressed="true"] { color: white; border-color: var(--ink); background: var(--ink); }
+    .section-nav button:hover:not([aria-pressed="true"]) { border-color: var(--gold); }
+    .panels { display: grid; grid-template-columns: minmax(0, 1.46fr) minmax(350px, 1fr); gap: 12px; align-items: start; }
+    .panel { min-width: 0; padding: clamp(14px, 1.45vw, 24px); background: var(--white); border: 1px solid var(--line); border-top: 3px solid var(--gold); border-radius: 6px; }
+    .pricing-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 0 16px; margin-top: 12px; }
+    .input-block { min-width: 0; }
+    .input-block + .input-block { border-left: 1px solid var(--line); padding-left: 16px; }
+    .input-block h3 { margin-bottom: 10px; }
+    .fields { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
     .field { min-width: 0; }
-    .field label { display: block; margin-bottom: 6px; font-size: 14px; font-weight: 700; }
+    .field label { display: block; margin-bottom: 4px; font-size: 13px; font-weight: 700; }
     .field-full { grid-column: 1 / -1; }
-    .credit { margin: 22px 0 0; padding: 16px 0 0; border: 0; border-top: 1px solid var(--line); min-width: 0; }
-    .credit legend { padding-right: 10px; font-size: 16px; font-weight: 700; }
-    .credit label { line-height: 1.25; }
-    .sale { margin-top: 20px; }
-    .sale summary { cursor: pointer; font-weight: 700; margin-bottom: 12px; }
-    .sale-results { margin-top: 20px; }
-    .sale-results h3 { font-size: 17px; margin-bottom: 0; }
-    .journal { margin-top: 22px; border-top: 1px solid var(--line); padding-top: 16px; }
+    .required-mark { color: #a83929; }
+    .required-note { margin-top: -6px; }
+    .credit, .cost-details, .metric-help { border-top: 1px solid var(--line); margin-top: 10px; padding-top: 9px; min-width: 0; }
+    .credit summary, .cost-details summary, .metric-help summary, .sheet-preview summary { cursor: pointer; font-weight: 700; font-size: 13px; }
+    .credit[open] .fields { margin-top: 10px; }
+    .sale-results { margin-top: 13px; }
+    .sale-results h3 { margin-bottom: 3px; }
+    .results-jump { display: none; }
+    .result-empty { padding: 18px 14px; background: var(--paper); color: var(--muted); font-size: 14px; line-height: 1.5; }
     .journal label { display: block; font-size: 14px; font-weight: 700; margin-bottom: 6px; }
-    .journal button { margin-top: 10px; padding: 10px 13px; font: inherit; font-weight: 700; color: #fff; background: #292720; border: 1px solid #292720; border-radius: 4px; cursor: pointer; }
+    .journal button { margin-top: 10px; padding: 9px 13px; font: inherit; font-weight: 700; color: #fff; background: #292720; border: 1px solid #292720; border-radius: 4px; cursor: pointer; }
     .journal button:disabled { opacity: .55; cursor: default; }
     .journal textarea { margin-top: 8px; width: 100%; }
     .journal .fields { margin: 10px 0; }
+    .journal > select { max-width: 420px; }
     .sheet-preview { margin: 12px 0 0; padding: 10px 12px; border: 1px solid var(--line); border-radius: 4px; }
-    .sheet-preview summary { cursor: pointer; font-weight: 700; }
     .sheet-preview dd { overflow-wrap: anywhere; }
-    .quote-panel { margin-top: 22px; }
-    .quote-panel summary { cursor: pointer; font: 700 23px Ubuntu, "Trebuchet MS", Arial, sans-serif; }
-    .quote-panel form { margin-top: 20px; }
+    .quote-panel form { margin-top: 12px; }
     .quote-actions { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 15px; }
     .quote-actions button { padding: 10px 13px; font: inherit; font-weight: 700; color: white; background: #292720; border: 1px solid #292720; border-radius: 4px; cursor: pointer; }
     .quote-actions button:disabled { opacity: .55; cursor: default; }
@@ -96,9 +97,9 @@
     @media print {
       /* Reserve document padding inside the page to hide browser headers and footers. */
       @page { size: A4; margin: 0; }
-      html:has(.quote-panel[open] .quote-sheet.preview), body:has(.quote-panel[open] .quote-sheet.preview), body:has(.quote-panel[open] .quote-sheet.preview) main { margin: 0; padding: 0; background: white; color: black; }
-      body:has(.quote-panel[open] .quote-sheet.preview) :is(.top, .hero, .panels, .quote-panel > summary, .quote-panel > form) { display: none !important; }
-      body:has(.quote-panel[open] .quote-sheet.preview) :is(.calculator, .quote-panel) { width: auto; margin: 0; padding: 0; border: 0; box-shadow: none; }
+      html:has(.quote-panel:not([hidden]) .quote-sheet.preview), body:has(.quote-panel:not([hidden]) .quote-sheet.preview), body:has(.quote-panel:not([hidden]) .quote-sheet.preview) main { margin: 0; padding: 0; background: white; color: black; }
+      body:has(.quote-panel:not([hidden]) .quote-sheet.preview) :is(.top, .section-nav, .panels, .journal, .quote-panel > h2, .quote-panel > form) { display: none !important; }
+      body:has(.quote-panel:not([hidden]) .quote-sheet.preview) :is(.calculator, .quote-panel) { width: auto; margin: 0; padding: 0; border: 0; box-shadow: none; }
       .quote-sheet.preview {
         width: auto;
         max-width: none;
@@ -113,9 +114,9 @@
     }
     .with-unit { display: flex; }
     input, select {
-      display: block; min-width: 0; width: 100%; min-height: 45px;
+      display: block; min-width: 0; width: 100%; min-height: 38px;
       background: var(--white); color: var(--ink); border: 1px solid #bcb4a3;
-      border-radius: 4px; padding: 8px 10px; font: inherit;
+      border-radius: 4px; padding: 6px 9px; font: inherit;
     }
     select { font-size: 14px; }
     .with-unit input { border-radius: 4px 0 0 4px; flex: 1; }
@@ -124,10 +125,19 @@
     input[aria-invalid="true"] { border-color: #a83929; }
     .hint { margin-top: 7px; color: var(--muted); font-size: 13px; line-height: 1.4; }
     .error { margin-top: 14px; color: #983424; line-height: 1.4; }
-    .summary { padding: 16px 18px; background: #292720; color: var(--white); }
-    .summary dt { color: var(--gold-light); font-size: 14px; }
-    .summary dd { margin-top: 5px; font-size: clamp(25px, 4vw, 38px); font-weight: 700; }
     dl { margin: 0; }
+    .summary { display: grid; grid-template-columns: minmax(0, 1.2fr) minmax(0, 1fr); gap: 10px; padding: 12px; background: #292720; color: var(--white); }
+    .summary dt { color: var(--gold-light); font-size: 12px; }
+    .summary dd { margin-top: 4px; font-size: clamp(19px, 2.1vw, 30px); font-weight: 700; }
+    .summary > div + div dd { font-size: clamp(17px, 1.75vw, 24px); }
+    .key-metrics, .cost-strip { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 6px; }
+    .key-metrics { margin-top: 9px; }
+    .key-metrics > div { background: var(--paper); padding: 8px 9px; }
+    .key-metrics dt, .cost-strip dt { font-size: 12px; font-weight: 700; line-height: 1.25; color: var(--muted); }
+    .key-metrics dd { margin-top: 4px; font-size: clamp(13px, 1.42vw, 20px); font-weight: 700; }
+    .key-metrics #sheet-margin-per-kg, .key-metrics .metric-note { font-size: 12px; color: var(--muted); }
+    .cost-strip { margin: 11px 0 0; }
+    .cost-strip dd { font-size: 14px; font-weight: 700; margin-top: 3px; }
     dd { margin: 0; font-variant-numeric: tabular-nums; overflow-wrap: anywhere; }
     .breakdown { margin: 14px 0; }
     .breakdown div { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 6px 12px; border-bottom: 1px solid var(--line); padding: 8px 0; line-height: 1.35; }
@@ -138,48 +148,36 @@
     thead th { color: var(--muted); }
     td { overflow-wrap: anywhere; font-variant-numeric: tabular-nums; }
     tbody td:last-child { font-weight: 700; }
-    @media screen and (max-width: 900px) {
-      .panels { grid-template-columns: minmax(0, 1fr); }
-      .wrap { width: calc(100% - 32px); }
-      .calculator { max-width: 740px; }
-      .section-nav {
-        display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 6px;
-        padding: 5px; margin-bottom: 14px; border: 1px solid var(--line); background: var(--white);
-      }
-      .section-nav a {
-        display: grid; place-items: center; min-height: 44px; padding: 6px 4px;
-        background: var(--paper); color: var(--ink); font-size: 14px; font-weight: 700; text-decoration: none;
-      }
-      .section-nav a:hover { background: #f0e9d7; }
-      #input-heading, #result-heading, #quote-panel { scroll-margin-top: 12px; }
+    @media screen and (min-width: 1100px) {
+      .journal .fields, .quote-panel form > .fields { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+      .quote-panel .field-full { grid-column: span 2; }
     }
-    @media screen and (max-width: 560px) {
-      .wrap { width: calc(100% - 24px); }
-      .hero { padding-block: 27px 37px; }
-      .hero p { font-size: 14px; }
-      h1 { font-size: clamp(25px, 7vw, 32px); }
-      h2 { font-size: 21px; margin-bottom: 15px; }
-      .panels { gap: 14px; }
-      .fields { grid-template-columns: minmax(0, 1fr); }
-      .panel { padding: 18px 14px; }
-      .top .wrap { min-height: 61px; }
-      .brand img { width: min(242px, 100%); }
-      input, select, textarea { font-size: 16px; }
+    @media screen and (max-width: 1040px) {
+      .panels { grid-template-columns: minmax(0, 1fr); }
+    }
+    @media screen and (max-width: 620px) {
+      .top .wrap { min-height: 58px; }
+      .brand { flex-basis: 98px; }
+      h1 { font-size: clamp(18px, 4.8vw, 24px); }
+      .calculator { padding-top: 8px; }
+      .section-nav { display: grid; grid-template-columns: minmax(0, 0.8fr) minmax(0, 1fr) minmax(0, 1.4fr); margin-bottom: 8px; }
+      .section-nav button { min-height: 44px; padding: 5px; font-size: 12px; line-height: 1.2; overflow-wrap: anywhere; }
+      .pricing-grid { grid-template-columns: minmax(0, 1fr); row-gap: 15px; }
+      .results-jump { display: inline-flex; align-items: center; min-height: 44px; padding: 6px 12px; color: var(--ink); font-size: 14px; font-weight: 700; }
+      .input-block + .input-block { border-left: 0; padding-left: 0; border-top: 1px solid var(--line); padding-top: 12px; }
+      .panel { padding: 13px 11px; }
+      input, select, textarea { font-size: 16px; min-height: 43px; }
       input[type="date"] { max-width: 100%; }
-      .with-unit select { flex-shrink: 0; min-width: 68px; }
-      .summary { padding-inline: 12px; }
-      .summary dd { font-size: clamp(24px, 7vw, 32px); }
-      .breakdown div { display: grid; grid-template-columns: minmax(0, 1fr) auto; }
-      .breakdown dd { max-width: min(34vw, 180px); text-align: right; }
-      .sale summary, .quote-panel summary { min-height: 44px; align-content: center; }
-      .quote-panel { margin-top: 14px; }
-      .quote-panel summary { font-size: 20px; line-height: 1.2; }
-      .quote-panel form { margin-top: 12px; }
-      .journal button, .quote-actions button { min-height: 44px; width: 100%; }
-      .quote-actions { display: grid; }
-      table { table-layout: fixed; font-size: 13px; }
-      th, td { padding-inline: 4px; overflow-wrap: anywhere; }
-      .panels table th:first-child { width: 17%; }
+      .with-unit select { flex-shrink: 0; min-width: 58px; }
+      .summary { padding-inline: 10px; }
+      .key-metrics { gap: 4px; }
+      .key-metrics > div { padding: 7px 5px; }
+      .key-metrics dt { font-size: 11px; }
+      .breakdown dd { max-width: min(45vw, 180px); text-align: right; }
+      .journal button, .quote-actions button { min-height: 44px; }
+      table { table-layout: fixed; font-size: 12px; }
+      th, td { padding-inline: 3px; overflow-wrap: anywhere; }
+      .panels table th:first-child { width: 15%; }
       .quote-sheet.preview { padding: 12px; }
       .quote-brand { gap: 10px; }
       .quote-identity { font-size: 10px; }
@@ -196,231 +194,238 @@
       <a class="brand" href="https://centr-fuel.ru/" aria-label="Сайт Центра Топливных Решений">
         <img src="data:image/svg+xml;base64,PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0idXRmLTgiPz4NCjwhLS0gR2VuZXJhdG9yOiBBZG9iZSBJbGx1c3RyYXRvciAyMy4wLjAsIFNWRyBFeHBvcnQgUGx1Zy1JbiAuIFNWRyBWZXJzaW9uOiA2LjAwIEJ1aWxkIDApICAtLT4NCjxzdmcgdmVyc2lvbj0iMS4xIiBpZD0i0KHQu9C+0LlfMSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIiB4bWxuczp4bGluaz0iaHR0cDovL3d3dy53My5vcmcvMTk5OS94bGluayIgeD0iMHB4IiB5PSIwcHgiDQoJIHZpZXdCb3g9IjAgMCAyNTIuOCAzNy43IiBzdHlsZT0iZW5hYmxlLWJhY2tncm91bmQ6bmV3IDAgMCAyNTIuOCAzNy43OyIgeG1sOnNwYWNlPSJwcmVzZXJ2ZSI+DQo8c3R5bGUgdHlwZT0idGV4dC9jc3MiPg0KCS5zdDB7ZGlzcGxheTpub25lO2ZpbGw6I0E5OEIzODt9DQoJLnN0MXtmaWxsLXJ1bGU6ZXZlbm9kZDtjbGlwLXJ1bGU6ZXZlbm9kZDtmaWxsOiMwMjAyMDI7fQ0KCS5zdDJ7ZmlsbC1ydWxlOmV2ZW5vZGQ7Y2xpcC1ydWxlOmV2ZW5vZGQ7ZmlsbDojMDMwMzAzO30NCgkuc3Qze2ZpbGwtcnVsZTpldmVub2RkO2NsaXAtcnVsZTpldmVub2RkO2ZpbGw6I0E5OEIzODt9DQoJLnN0NHtmaWxsLXJ1bGU6ZXZlbm9kZDtjbGlwLXJ1bGU6ZXZlbm9kZDtmaWxsOiNGQUZFRkY7fQ0KCS5zdDV7ZmlsbDojQTk4QjM4O30NCjwvc3R5bGU+DQo8cGF0aCBjbGFzcz0ic3QwIiBkPSJNNTUuOS0yOC43djQuNmgwLjV2Mi4xaC0wLjhsLTAuMS0xLjNoLTMuM3YxLjNoLTAuOHYtMi4xaDAuNGMwLjItMC40LDAuNC0wLjgsMC41LTEuMmMwLjItMC42LDAuMi0xLjIsMC4yLTINCgl2LTEuNEg1NS45eiBNNTMuNS0yN2MwLDAuNy0wLjEsMS40LTAuMywyYy0wLjEsMC40LTAuMywwLjctMC40LDFoMi4xdi0zLjhoLTEuNEM1My41LTI3LjgsNTMuNS0yNyw1My41LTI3eiBNNjQuNy0yNg0KCWMwLDEuOC0xLjEsMi44LTIuNiwyLjhzLTIuNS0xLjItMi41LTIuN2MwLTEuNywxLTIuOCwyLjYtMi44QzYzLjgtMjguOCw2NC43LTI3LjYsNjQuNy0yNnogTTYwLjctMjZjMCwxLjEsMC42LDIsMS41LDINCgljMSwwLDEuNS0wLjksMS41LTJjMC0xLTAuNS0yLTEuNS0yUzYwLjctMjcuMSw2MC43LTI2eiBNNzIuMi0yMy40Yy0wLjIsMC4xLTAuNywwLjItMS40LDAuMmMtMS43LDAtMi44LTEuMS0yLjgtMi43DQoJYzAtMS44LDEuMi0yLjgsMi45LTIuOGMwLjYsMCwxLjEsMC4xLDEuMywwLjJMNzItMjcuN2MtMC4yLTAuMi0wLjUtMC4zLTEtMC4zYy0xLjEsMC0xLjksMC43LTEuOSwyYzAsMS4yLDAuNywxLjksMS45LDEuOQ0KCWMwLjQsMCwwLjgtMC4xLDEuMS0wLjJMNzIuMi0yMy40eiBNNzcuMS0yNy45aC0xLjV2LTAuOGg0LjF2MC44aC0xLjZ2NC42aC0xVi0yNy45eiBNODMuNS0yNC44TDgzLTIzLjNoLTFsMS43LTUuNEg4NWwxLjgsNS40aC0xLjENCglsLTAuNS0xLjVIODMuNXogTTg1LjEtMjUuNmwtMC40LTEuM2MtMC4xLTAuMy0wLjItMC43LTAuMy0xbDAsMGMtMC4xLDAuMy0wLjIsMC43LTAuMywxbC0wLjQsMS4zSDg1LjF6IE05MC4zLTI4LjYNCgljMC4zLTAuMSwwLjktMC4xLDEuNC0wLjFjMC43LDAsMS4yLDAuMSwxLjUsMC4zYzAuMywwLjIsMC42LDAuNiwwLjYsMWMwLDAuNS0wLjMsMS0wLjksMS4ybDAsMGMwLjYsMC4xLDEuMSwwLjYsMS4xLDEuMw0KCWMwLDAuNS0wLjIsMC45LTAuNSwxLjFjLTAuNCwwLjMtMSwwLjUtMiwwLjVjLTAuNSwwLTEsMC0xLjItMC4xVi0yOC42eiBNOTEuMy0yNi41aDAuNWMwLjcsMCwxLjEtMC4zLDEuMS0wLjhzLTAuNC0wLjctMS0wLjcNCgljLTAuMywwLTAuNSwwLTAuNiwwVi0yNi41eiBNOTEuMy0yNGMwLjEsMCwwLjMsMCwwLjUsMGMwLjYsMCwxLjItMC4yLDEuMi0wLjljMC0wLjYtMC41LTAuOS0xLjItMC45aC0wLjVWLTI0eiBNOTguNy0yOC43djIuM2gwLjINCglsMS42LTIuM2gxLjJsLTIsMi40YzAuOCwwLjEsMS4xLDAuNywxLjQsMS4zYzAuMiwwLjYsMC40LDEuMSwwLjYsMS42aC0xLjFjLTAuMi0wLjQtMC4zLTAuOC0wLjQtMS4yYy0wLjItMC43LTAuNS0xLjEtMS4zLTEuMWgtMC4yDQoJdjIuNGgtMXYtNS40Qzk3LjctMjguNyw5OC43LTI4LjcsOTguNy0yOC43eiBNMTA2LjMtMjQuOGwtMC41LDEuNWgtMWwxLjctNS40aDEuM2wxLjgsNS40aC0xLjFsLTAuNS0xLjVIMTA2LjN6IE0xMDcuOS0yNS42DQoJbC0wLjQtMS4zYy0wLjEtMC4zLTAuMi0wLjctMC4zLTFsMCwwYy0wLjEsMC4zLTAuMiwwLjctMC4zLDFsLTAuNCwxLjNIMTA3Ljl6IE0xMjEuNi0yOC43djQuNmgwLjVMMTIyLTIyaC0wLjhsLTAuMS0xLjNIMTE4DQoJbC0wLjEsMS4zaC0wLjh2LTIuMWgwLjRjMC4yLTAuNCwwLjQtMC44LDAuNS0xLjJjMC4yLTAuNiwwLjItMS4yLDAuMi0ydi0xLjRIMTIxLjZ6IE0xMTkuMi0yN2MwLDAuNy0wLjEsMS40LTAuMywyDQoJYy0wLjEsMC40LTAuMywwLjctMC40LDFoMi4xdi0zLjhoLTEuNEMxMTkuMi0yNy44LDExOS4yLTI3LDExOS4yLTI3eiBNMTI2LjYtMjguN3YxLjljMCwwLjksMCwxLjYtMC4xLDIuNGwwLDANCgljMC4zLTAuNiwwLjYtMS4zLDEtMS45bDEuNC0yLjRoMXY1LjRIMTI5di0xLjljMC0wLjgsMC0xLjUsMC4xLTIuMmwwLDBjLTAuMywwLjYtMC42LDEuMy0xLDEuOWwtMS40LDIuM2gtMS4xdi01LjRMMTI2LjYtMjguNw0KCUwxMjYuNi0yOC43eiBNMTMzLjctMjguM2MwLjQtMC4yLDAuOS0wLjQsMS42LTAuNGMxLjEsMCwxLjcsMC41LDEuNywxLjRjMCwwLjctMC41LDEuMS0xLjEsMS4zbDAsMGMwLjcsMC4xLDEuMywwLjYsMS4zLDEuMw0KCWMwLDEuMi0xLjEsMS42LTIuMSwxLjZjLTAuNSwwLTEuMS0wLjEtMS41LTAuNGwwLjItMC44YzAuMywwLjEsMC44LDAuMywxLjMsMC4zYzAuNywwLDEuMS0wLjMsMS4xLTAuOGMwLTAuNy0wLjctMC45LTEuMy0wLjloLTAuNA0KCXYtMC43aDAuNGMwLjYsMCwxLjEtMC4zLDEuMS0wLjhjMC0wLjQtMC4zLTAuNy0wLjktMC43Yy0wLjQsMC0wLjksMC4yLTEuMiwwLjNMMTMzLjctMjguM3ogTTE0My45LTI1LjdoLTJ2MS42aDIuM3YwLjhoLTMuM3YtNS40DQoJaDMuMXYwLjhoLTIuMnYxLjRoMkwxNDMuOS0yNS43TDE0My45LTI1Ljd6IE0xNTEuOC0yOC43djUuNGgtMXYtNC42aC0xLjV2MS40YzAsMS4zLTAuMSwyLjUtMC45LDNjLTAuMiwwLjEtMC42LDAuMy0xLDAuM2wtMC4xLTAuOA0KCWMwLjIsMCwwLjUtMC4yLDAuNi0wLjNjMC40LTAuNCwwLjQtMS4yLDAuNC0yLjF2LTIuM0gxNTEuOHogTTE1Ni43LTI4Ljd2MS45YzAuMiwwLDAuNSwwLDAuNywwYzEuMSwwLDIuMSwwLjUsMi4xLDEuNw0KCWMwLDAuNS0wLjIsMC45LTAuNCwxLjJjLTAuNSwwLjUtMS4zLDAuNy0yLjEsMC43Yy0wLjYsMC0xLDAtMS4yLTAuMXYtNS40QzE1NS44LTI4LjcsMTU2LjctMjguNywxNTYuNy0yOC43eiBNMTU2LjctMjQNCgljMC4xLDAsMC4zLDAsMC41LDBjMC43LDAsMS4yLTAuMywxLjItMXMtMC42LTEtMS4yLTFjLTAuMiwwLTAuNCwwLTAuNSwwVi0yNHogTTE2NC4xLTI4Ljd2Mi4yaDIuM3YtMi4yaDF2NS40aC0xdi0yLjRoLTIuM3YyLjRoLTENCgl2LTUuNEgxNjQuMXogTTE3Ni4xLTI2YzAsMS44LTEuMSwyLjgtMi42LDIuOHMtMi41LTEuMi0yLjUtMi43YzAtMS43LDEtMi44LDIuNi0yLjhDMTc1LjEtMjguOCwxNzYuMS0yNy42LDE3Ni4xLTI2eiBNMTcyLTI2DQoJYzAsMS4xLDAuNiwyLDEuNSwyYzEsMCwxLjUtMC45LDEuNS0yYzAtMS0wLjUtMi0xLjUtMkMxNzIuNi0yOCwxNzItMjcuMSwxNzItMjZ6IE0xODIuOC0yOC43djAuOGgtMi4xdjQuNmgtMXYtNS40SDE4Mi44eg0KCSBNMTkwLjctMjZjMCwxLjgtMS4xLDIuOC0yLjYsMi44cy0yLjUtMS4yLTIuNS0yLjdjMC0xLjcsMS0yLjgsMi42LTIuOEMxODkuOC0yOC44LDE5MC43LTI3LjYsMTkwLjctMjZ6IE0xODYuNy0yNg0KCWMwLDEuMSwwLjYsMiwxLjUsMmMxLDAsMS41LTAuOSwxLjUtMmMwLTEtMC41LTItMS41LTJTMTg2LjctMjcuMSwxODYuNy0yNnogTTE5OS45LTI3LjloLTEuNXYtMC44aDQuMXYwLjhoLTEuNnY0LjZoLTFWLTI3Ljl6DQoJIE0yMTAuNC0yNmMwLDEuOC0xLjEsMi44LTIuNiwyLjhzLTIuNS0xLjItMi41LTIuN2MwLTEuNywxLTIuOCwyLjYtMi44QzIwOS40LTI4LjgsMjEwLjQtMjcuNiwyMTAuNC0yNnogTTIwNi4zLTI2DQoJYzAsMS4xLDAuNiwyLDEuNSwyYzEsMCwxLjUtMC45LDEuNS0yYzAtMS0wLjUtMi0xLjUtMkMyMDYuOS0yOCwyMDYuMy0yNy4xLDIwNi4zLTI2eiBNMjE4LjItMjguN3Y1LjRoLTF2LTQuNkgyMTV2NC42aC0xdi01LjQNCglIMjE4LjJ6IE0yMjUuOS0yOC43djUuNGgtMXYtNC42aC0xLjV2MS40YzAsMS4zLTAuMSwyLjUtMC45LDNjLTAuMiwwLjEtMC42LDAuMy0xLDAuM2wtMC4xLTAuOGMwLjIsMCwwLjUtMC4yLDAuNi0wLjMNCgljMC40LTAuNCwwLjQtMS4yLDAuNC0yLjF2LTIuM0gyMjUuOXogTTIzMC44LTI4Ljd2MS45YzAsMC45LDAsMS42LTAuMSwyLjRsMCwwYzAuMy0wLjYsMC42LTEuMywxLTEuOWwxLjQtMi40aDF2NS40aC0wLjl2LTEuOQ0KCWMwLTAuOCwwLTEuNSwwLjEtMi4ybDAsMGMtMC4zLDAuNi0wLjYsMS4zLTEsMS45bC0xLjQsMi4zaC0xLjF2LTUuNEwyMzAuOC0yOC43TDIzMC44LTI4Ljd6IE0yMzguMS0yOC42YzAuMy0wLjEsMC45LTAuMSwxLjQtMC4xDQoJYzAuNywwLDEuMiwwLjEsMS41LDAuM2MwLjMsMC4yLDAuNiwwLjYsMC42LDFjMCwwLjUtMC4zLDEtMC45LDEuMmwwLDBjMC42LDAuMSwxLjEsMC42LDEuMSwxLjNjMCwwLjUtMC4yLDAuOS0wLjUsMS4xDQoJYy0wLjQsMC4zLTEsMC41LTIsMC41Yy0wLjUsMC0xLDAtMS4yLTAuMUwyMzguMS0yOC42TDIzOC4xLTI4LjZ6IE0yMzktMjYuNWgwLjVjMC43LDAsMS4xLTAuMywxLjEtMC44cy0wLjQtMC43LTEtMC43DQoJYy0wLjMsMC0wLjUsMC0wLjYsMFYtMjYuNXogTTIzOS0yNGMwLjEsMCwwLjMsMCwwLjUsMGMwLjYsMCwxLjItMC4yLDEuMi0wLjljMC0wLjYtMC41LTAuOS0xLjItMC45SDIzOVYtMjR6IE0yNDYuNi0yNC44bC0wLjUsMS41DQoJaC0xbDEuNy01LjRoMS4zbDEuOCw1LjRoLTEuMWwtMC41LTEuNUgyNDYuNnogTTI0OC4xLTI1LjZsLTAuNC0xLjNjLTAuMS0wLjMtMC4yLTAuNy0wLjMtMWwwLDBjLTAuMSwwLjMtMC4yLDAuNy0wLjMsMWwtMC40LDEuMw0KCUgyNDguMXoiLz4NCjxwb2x5Z29uIGNsYXNzPSJzdDEiIHBvaW50cz0iMCwwIDM1LjEsMCAzMSw0LjEgNC4xLDQuMSA0LjEsMzEgMCwzNS4xICIvPg0KPHBvbHlnb24gY2xhc3M9InN0MiIgcG9pbnRzPSIzLjIsMzcuNyA3LjMsMzMuNiAzMy44LDMzLjYgMzMuOCw3LjIgMzcuOSwzLjEgMzcuOSwzNy43ICIvPg0KPHBhdGggY2xhc3M9InN0MyIgZD0iTTI3LjUsMjIuOGMwLDUtNC4zLDguNy04LjUsOC43Yy00LjMsMC04LjUtNC4xLTguNC04LjdjMC40LTYsNi4zLTEwLjYsOC40LTE2LjJDMjEuMywxMi4xLDI3LjEsMTYuNSwyNy41LDIyLjgNCgl6Ii8+DQo8cGF0aCBjbGFzcz0ic3Q0IiBkPSJNMjYuMiwyNC43YzAsMy42LTMuMSw2LjQtNi4yLDYuNHMtNi4yLTMtNi4yLTYuNGMwLjMtNC40LDQuNi03LjgsNi4yLTExLjlDMjEuNywxNi45LDI1LjksMjAuMSwyNi4yLDI0Ljd6Ii8+DQo8cGF0aCBjbGFzcz0ic3QzIiBkPSJNMjUuNywyNmMwLDIuOC0yLjQsNC45LTQuOCw0LjlzLTQuOC0yLjMtNC43LTQuOWMwLjItMy40LDMuNS02LDQuNy05LjFDMjIuMiwyMC4xLDI1LjQsMjIuNSwyNS43LDI2eiIvPg0KPHBhdGggZD0iTTUyLjgsNy4zdjkuOUg1N1Y3LjNoMS45djkuOWwxLDAuMWwtMC4xLDQuNWgtMS41TDU4LjIsMTlINTFWNy4zSDUyLjh6IE02My42LDE1LjNjMCwxLjUsMS4xLDIuMiwyLjMsMi4yDQoJYzAuOSwwLDEuNS0wLjEsMi4xLTAuNGwwLjMsMS41Yy0wLjYsMC4zLTEuNSwwLjUtMi42LDAuNWMtMi40LDAtMy44LTEuNy0zLjgtNC4zYzAtMi4zLDEuMy00LjUsMy43LTQuNXMzLjIsMi4yLDMuMiw0LjENCgljMCwwLjQsMCwwLjctMC4xLDAuOUM2OC43LDE1LjMsNjMuNiwxNS4zLDYzLjYsMTUuM3ogTTY2LjksMTMuOWMwLTAuOC0wLjMtMi4xLTEuNS0yLjFzLTEuNywxLjItMS43LDIuMUg2Ni45eiBNNzIuOSwxMC42djMuMmgyLjkNCgl2LTMuMmgxLjlWMTloLTEuOXYtMy41aC0yLjlWMTlINzF2LTguNEg3Mi45eiBNODYuMSwxMC42djEuNmgtMi4yVjE5SDgydi02LjhoLTIuMnYtMS42Qzc5LjgsMTAuNiw4Ni4xLDEwLjYsODYuMSwxMC42eiBNODcuOSwxMy4zDQoJYzAtMS4xLDAtMi0wLjEtMi44aDEuN2wwLjEsMS4zbDAsMGMwLjYtMC45LDEuNC0xLjUsMi42LTEuNWMxLjcsMCwzLjEsMS43LDMuMSw0LjNjMCwzLTEuNyw0LjUtMy40LDQuNWMtMC45LDAtMS43LTAuNC0yLjEtMS4xbDAsMA0KCXY0LjNoLTEuOUM4Ny45LDIyLjMsODcuOSwxMy4zLDg3LjksMTMuM3ogTTg5LjgsMTUuNGMwLDAuMiwwLDAuNCwwLjEsMC42YzAuMiwwLjksMC45LDEuNSwxLjcsMS41YzEuMiwwLDEuOS0xLjEsMS45LTIuOA0KCWMwLTEuNS0wLjYtMi43LTEuOS0yLjdjLTAuOCwwLTEuNSwwLjYtMS43LDEuNmMwLDAuMi0wLjEsMC40LTAuMSwwLjVWMTUuNHogTTEwMS45LDkuMUg5OVY3LjNoNy44djEuOGgtM1YxOWgtMS45VjkuMXogTTExNC4zLDE0LjcNCgljMCwzLjEtMS45LDQuNS0zLjgsNC41Yy0yLjEsMC0zLjctMS42LTMuNy00LjNjMC0yLjgsMS42LTQuNSwzLjktNC41QzExMi44LDEwLjQsMTE0LjMsMTIuMSwxMTQuMywxNC43eiBNMTA4LjcsMTQuOA0KCWMwLDEuNiwwLjcsMi44LDEuOSwyLjhjMS4xLDAsMS44LTEuMiwxLjgtMi45YzAtMS4zLTAuNS0yLjgtMS44LTIuOEMxMDkuMiwxMS45LDEwOC43LDEzLjQsMTA4LjcsMTQuOHogTTEyMy4zLDEwLjZWMTloLTEuOXYtNi44DQoJaC0yLjhWMTloLTEuOXYtOC40SDEyMy4zeiBNMTMyLjQsMTAuNlYxOWgtMS45di02LjhoLTJWMTRjMCwyLjItMC4yLDMuNy0xLjEsNC40Yy0wLjQsMC41LTEsMC43LTEuOSwwLjdsLTAuMi0xLjcNCgljMC4zLTAuMSwwLjYtMC4yLDAuOC0wLjRjMC42LTAuNSwwLjYtMS41LDAuNi0zLjF2LTMuNGg1LjdMMTMyLjQsMTAuNkwxMzIuNCwxMC42eiBNMTM3LjEsMTAuNnYzYzAsMS4zLDAsMi4yLTAuMSwzLjRsMCwwDQoJYzAuNC0xLDAuNi0xLjYsMS0yLjVsMS44LTMuOWgyLjNWMTloLTEuOHYtM2MwLTEuMywwLTIsMC4xLTMuNmgtMC4xYy0wLjQsMS0wLjYsMS42LTEsMi40Yy0wLjYsMS4yLTEuMywyLjgtMS45LDQuMWgtMi4zdi04LjRoMg0KCVYxMC42eiBNMTQ1LjEsMTAuN2MwLjYtMC4xLDEuNy0wLjIsMi43LTAuMmMxLjMsMCwzLjUsMC4yLDMuNSwyLjFjMCwxLjEtMC43LDEuNy0xLjUsMS45bDAsMGMxLjEsMC4yLDEuOSwwLjksMS45LDIuMQ0KCWMwLDIuMy0yLjcsMi41LTQuMiwyLjVjLTAuOSwwLTEuOS0wLjEtMi40LTAuMVYxMC43eiBNMTQ2LjksMTcuN2MwLjMsMCwwLjUsMC4xLDAuOSwwLjFjMC45LDAsMS45LTAuMywxLjktMS4yYzAtMC45LTAuOC0xLjMtMi0xLjMNCgloLTAuOEwxNDYuOSwxNy43TDE0Ni45LDE3Ljd6IE0xNDcsMTMuOWgwLjhjMSwwLDEuOC0wLjMsMS44LTEuMWMwLTAuNy0wLjUtMS0xLjYtMWMtMC40LDAtMC42LDAtMC45LDAuMXYySDE0N3ogTTE1NiwxMC42djMuMmgyLjkNCgl2LTMuMmgxLjlWMTloLTEuOXYtMy41SDE1NlYxOWgtMS45di04LjRIMTU2eiBNMTY1LjYsMTAuNnYyLjdjMC4zLTAuMSwwLjctMC4xLDEuMi0wLjFjMS42LDAsMy4zLDAuOCwzLjMsMi45YzAsMS0wLjQsMS43LTAuOSwyLjENCgljLTAuOSwwLjgtMi4xLDAuOS0zLjIsMC45Yy0wLjgsMC0xLjYtMC4xLTIuMy0wLjF2LTguNEgxNjUuNnogTTE2NS42LDE3LjVjMC4yLDAsMC41LDAuMSwwLjgsMC4xYzAuOSwwLDEuOC0wLjQsMS44LTEuNQ0KCXMtMC45LTEuNS0xLjctMS41Yy0wLjQsMC0wLjYsMC4xLTAuOSwwLjFMMTY1LjYsMTcuNUwxNjUuNiwxNy41eiBNMTcyLjgsMTAuNlYxOUgxNzF2LTguNEgxNzIuOHogTTE3Ny4zLDEwLjZsMC45LDEuNg0KCWMwLjIsMC40LDAuNSwwLjksMC43LDEuM2wwLDBjMC4yLTAuNSwwLjQtMC45LDAuNi0xLjNsMC44LTEuNmgyLjFsLTIuNSw0bDIuNSw0LjRoLTIuMWwtMC45LTEuN2MtMC4yLTAuNC0wLjUtMC45LTAuNy0xLjRsMCwwDQoJYy0wLjIsMC41LTAuNCwwLjktMC43LDEuNGwtMC45LDEuN0gxNzVsMi42LTQuM2wtMi41LTQuMUgxNzcuM3ogTTE4Ni41LDcuNWMwLjctMC4xLDEuNi0wLjIsMi45LTAuMmMxLjQsMCwyLjQsMC4zLDMuMSwwLjkNCgljMC42LDAuNiwxLDEuNSwxLDIuNnMtMC4zLDItMC45LDIuNmMtMC44LDAuOC0xLjksMS4yLTMuMywxLjJjLTAuNCwwLTAuNywwLTAuOS0wLjFWMTloLTEuOUwxODYuNSw3LjVMMTg2LjUsNy41eiBNMTg4LjQsMTIuOQ0KCWMwLjIsMC4xLDAuNSwwLjEsMC45LDAuMWMxLjQsMCwyLjMtMC44LDIuMy0yLjFzLTAuOC0yLTIuMS0yYy0wLjUsMC0wLjksMC4xLTEuMSwwLjFMMTg4LjQsMTIuOUwxODguNCwxMi45eiBNMTk2LjksMTUuMw0KCWMwLDEuNSwxLjEsMi4yLDIuMywyLjJjMC45LDAsMS41LTAuMSwyLjEtMC40bDAuMywxLjVjLTAuNiwwLjMtMS41LDAuNS0yLjYsMC41Yy0yLjQsMC0zLjgtMS43LTMuOC00LjNjMC0yLjMsMS4zLTQuNSwzLjctNC41DQoJczMuMiwyLjIsMy4yLDQuMWMwLDAuNCwwLDAuNy0wLjEsMC45QzIwMiwxNS4zLDE5Ni45LDE1LjMsMTk2LjksMTUuM3ogTTIwMC4xLDEzLjljMC0wLjgtMC4zLTIuMS0xLjUtMi4xcy0xLjcsMS4yLTEuNywyLjFIMjAwLjF6DQoJIE0yMDYuMSwxMC42djYuOGgyLjJ2LTYuOGgxLjl2Ni44aDIuMnYtNi44aDEuOVYxOWgtMTB2LTguNEgyMDYuMXogTTIxOC45LDE1LjNjMCwxLjUsMS4xLDIuMiwyLjMsMi4yYzAuOSwwLDEuNS0wLjEsMi4xLTAuNA0KCWwwLjMsMS41Yy0wLjYsMC4zLTEuNSwwLjUtMi42LDAuNWMtMi40LDAtMy44LTEuNy0zLjgtNC4zYzAtMi4zLDEuMy00LjUsMy43LTQuNXMzLjIsMi4yLDMuMiw0LjFjMCwwLjQsMCwwLjctMC4xLDAuOQ0KCUMyMjQsMTUuMywyMTguOSwxNS4zLDIxOC45LDE1LjN6IE0yMjIuMSwxMy45YzAtMC44LTAuMy0yLjEtMS41LTIuMXMtMS43LDEuMi0xLjcsMi4xSDIyMi4xeiBNMjI4LjIsMTAuNnYzLjJoMi45di0zLjJoMS45VjE5aC0xLjkNCgl2LTMuNWgtMi45VjE5aC0xLjl2LTguNEgyMjguMnogTTIzNy43LDEwLjZ2M2MwLDEuMywwLDIuMi0wLjEsMy40bDAsMGMwLjQtMSwwLjYtMS42LDEtMi41bDEuOC0zLjloMi4zVjE5SDI0MXYtMw0KCWMwLTEuMywwLTIsMC4xLTMuNkgyNDFjLTAuNCwxLTAuNiwxLjYtMSwyLjRjLTAuNiwxLjItMS4zLDIuOC0xLjksNC4xaC0yLjN2LTguNGgxLjlWMTAuNnogTTI0Ny41LDEwLjZ2M2MwLDEuMywwLDIuMi0wLjEsMy40bDAsMA0KCWMwLjQtMSwwLjYtMS42LDEtMi41bDEuOC0zLjloMi4zVjE5aC0xLjh2LTNjMC0xLjMsMC0yLDAuMS0zLjZoLTAuMWMtMC40LDEtMC42LDEuNi0xLDIuNGMtMC42LDEuMi0xLjMsMi44LTEuOSw0LjFoLTIuM3YtOC40aDINCglWMTAuNnogTTI0OC4zLDcuMWMwLDAuNywwLjMsMS4zLDAuOCwxLjNjMC42LDAsMC44LTAuNSwwLjktMS4zaDEuM2MtMC4xLDEuNS0wLjksMi4zLTIuMiwyLjNjLTEuNCwwLTItMC45LTIuMS0yLjMNCglDMjQ3LDcuMSwyNDguMyw3LjEsMjQ4LjMsNy4xeiIvPg0KPGc+DQoJPHBhdGggY2xhc3M9InN0NSIgZD0iTTU1LDI1LjR2NS4zaC0xdi00LjVoLTIuMXY0LjVoLTF2LTUuM0M1MC45LDI1LjQsNTUsMjUuNCw1NSwyNS40eiIvPg0KCTxwYXRoIGNsYXNzPSJzdDUiIGQ9Ik02NSwyOGMwLDEuOC0xLjEsMi44LTIuNSwyLjhjLTEuNSwwLTIuNC0xLjEtMi40LTIuN3MxLTIuOCwyLjUtMi44UzY1LDI2LjUsNjUsMjh6IE02MS4xLDI4LjENCgkJYzAsMS4xLDAuNSwxLjksMS41LDEuOWMwLjksMCwxLjUtMC45LDEuNS0yYzAtMS0wLjUtMS45LTEuNS0xLjlTNjEuMSwyNyw2MS4xLDI4LjF6Ii8+DQoJPHBhdGggY2xhc3M9InN0NSIgZD0iTTczLjksMzAuNWMtMC4yLDAuMS0wLjcsMC4yLTEuNCwwLjJjLTEuNywwLTIuNy0xLjEtMi43LTIuN2MwLTEuNywxLjItMi44LDIuOC0yLjhjMC42LDAsMS4xLDAuMSwxLjMsMC4yDQoJCWwtMC4yLDAuOGMtMC4zLTAuMS0wLjYtMC4yLTEtMC4yYy0xLjEsMC0xLjgsMC43LTEuOCwxLjljMCwxLjIsMC43LDEuOSwxLjgsMS45YzAuNCwwLDAuOC0wLjEsMS0wLjJMNzMuOSwzMC41eiIvPg0KCTxwYXRoIGNsYXNzPSJzdDUiIGQ9Ik04MC4xLDI2LjJoLTEuNXYtMC44aDR2MC44aC0xLjV2NC41aC0xVjI2LjJ6Ii8+DQoJPHBhdGggY2xhc3M9InN0NSIgZD0iTTg3LjksMjkuMmwtMC41LDEuNWgtMWwxLjctNS4zaDEuMmwxLjcsNS4zaC0xbC0wLjUtMS41SDg3Ljl6IE04OS40LDI4LjVMODksMjcuMmMtMC4xLTAuMy0wLjItMC43LTAuMy0xbDAsMA0KCQljLTAuMSwwLjMtMC4yLDAuNy0wLjMsMUw4OCwyOC41SDg5LjR6Ii8+DQoJPHBhdGggY2xhc3M9InN0NSIgZD0iTTk2LDI1LjVjMC4zLTAuMSwwLjktMC4xLDEuNC0wLjFjMC43LDAsMS4yLDAuMSwxLjUsMC4zYzAuMywwLjIsMC41LDAuNSwwLjUsMXMtMC4zLDAuOS0wLjksMS4xbDAsMA0KCQljMC42LDAuMSwxLjEsMC42LDEuMSwxLjNjMCwwLjUtMC4yLDAuOC0wLjUsMS4xYy0wLjQsMC4zLTEsMC41LTIsMC41Yy0wLjUsMC0wLjksMC0xLjItMC4xTDk2LDI1LjVMOTYsMjUuNXogTTk3LDI3LjZoMC41DQoJCWMwLjcsMCwxLTAuMywxLTAuOHMtMC40LTAuNy0xLTAuN2MtMC4zLDAtMC40LDAtMC41LDBWMjcuNnogTTk3LDMwYzAuMSwwLDAuMywwLDAuNSwwYzAuNiwwLDEuMi0wLjIsMS4yLTAuOQ0KCQljMC0wLjYtMC41LTAuOS0xLjItMC45SDk3VjMweiIvPg0KCTxwYXRoIGNsYXNzPSJzdDUiIGQ9Ik0xMDUuNywyNS40djIuM2gwLjJsMS42LTIuM2gxLjJsLTEuOSwyLjRjMC44LDAuMSwxLjEsMC42LDEuMywxLjNjMC4yLDAuNiwwLjQsMS4xLDAuNiwxLjZoLTENCgkJYy0wLjItMC40LTAuMy0wLjgtMC40LTEuMmMtMC4yLTAuNi0wLjUtMS4xLTEuMi0xLjFoLTAuMnYyLjNIMTA1di01LjNDMTA1LDI1LjQsMTA1LjcsMjUuNCwxMDUuNywyNS40eiIvPg0KCTxwYXRoIGNsYXNzPSJzdDUiIGQ9Ik0xMTQuNywyOS4ybC0wLjUsMS41aC0xbDEuNy01LjNoMS4ybDEuNyw1LjNoLTFsLTAuNS0xLjVIMTE0Ljd6IE0xMTYuMiwyOC41bC0wLjQtMS4zYy0wLjEtMC4zLTAuMi0wLjctMC4zLTENCgkJbDAsMGMtMC4xLDAuMy0wLjIsMC43LTAuMywxbC0wLjQsMS4zSDExNi4yeiIvPg0KCTxwYXRoIGNsYXNzPSJzdDUiIGQ9Ik0xMzMuNiwyNS40djIuMWgyLjJ2LTIuMWgxdjUuM2gtMXYtMi4zaC0yLjJ2Mi4zaC0xdi01LjNDMTMyLjYsMjUuNCwxMzMuNiwyNS40LDEzMy42LDI1LjR6Ii8+DQoJPHBhdGggY2xhc3M9InN0NSIgZD0iTTE0NS4xLDI4LjRoLTJ2MS41aDIuMnYwLjhoLTMuMnYtNS4zaDMuMXYwLjhoLTIuMXYxLjRoMlYyOC40eiIvPg0KCTxwYXRoIGNsYXNzPSJzdDUiIGQ9Ik0xNTMuMywyNS4ydjAuNWMxLjEsMC4xLDIuMiwwLjcsMi4yLDIuNGMwLDEuNi0xLjEsMi4zLTIuMywyLjRWMzFoLTAuOXYtMC41Yy0xLjEtMC4xLTIuMi0wLjctMi4yLTIuMw0KCQljMC0xLjcsMS4yLTIuMywyLjItMi40di0wLjVoMVYyNS4yeiBNMTUyLjQsMjYuM2MtMC42LDAuMS0xLjMsMC41LTEuMywxLjdjMCwxLjEsMC43LDEuNiwxLjMsMS43VjI2LjN6IE0xNTMuMywyOS44DQoJCWMwLjYtMC4xLDEuMy0wLjUsMS4zLTEuN3MtMC42LTEuNy0xLjMtMS43VjI5Ljh6Ii8+DQoJPHBhdGggY2xhc3M9InN0NSIgZD0iTTE2MS40LDI2LjJoLTEuNXYtMC44aDR2MC44aC0xLjV2NC41aC0xVjI2LjJ6Ii8+DQoJPHBhdGggY2xhc3M9InN0NSIgZD0iTTE3MS43LDI4LjRoLTJ2MS41aDIuMnYwLjhoLTMuMnYtNS4zaDMuMXYwLjhoLTIuMXYxLjRoMlYyOC40eiIvPg0KCTxwYXRoIGNsYXNzPSJzdDUiIGQ9Ik0xODEuMSwyNS40djUuM2gtMXYtNC41SDE3OHY0LjVoLTF2LTUuM0MxNzcsMjUuNCwxODEuMSwyNS40LDE4MS4xLDI1LjR6Ii8+DQoJPHBhdGggY2xhc3M9InN0NSIgZD0iTTE4Ni40LDI1LjVjMC4zLTAuMSwwLjgtMC4xLDEuNS0wLjFzMS4yLDAuMSwxLjYsMC40YzAuMywwLjMsMC41LDAuNywwLjUsMS4ycy0wLjIsMC45LTAuNSwxLjINCgkJYy0wLjQsMC40LTEsMC42LTEuNywwLjZjLTAuMiwwLTAuMywwLTAuNSwwdjJoLTFMMTg2LjQsMjUuNUwxODYuNCwyNS41eiBNMTg3LjMsMjhjMC4xLDAsMC4zLDAsMC41LDBjMC43LDAsMS4yLTAuNCwxLjItMQ0KCQlzLTAuNC0wLjktMS4xLTAuOWMtMC4zLDAtMC41LDAtMC42LDBMMTg3LjMsMjhMMTg3LjMsMjh6Ii8+DQoJPHBhdGggY2xhc3M9InN0NSIgZD0iTTE5OS42LDI4YzAsMS44LTEuMSwyLjgtMi41LDIuOGMtMS41LDAtMi40LTEuMS0yLjQtMi43czEtMi44LDIuNS0yLjhDMTk4LjcsMjUuMywxOTkuNiwyNi41LDE5OS42LDI4eg0KCQkgTTE5NS43LDI4LjFjMCwxLjEsMC41LDEuOSwxLjUsMS45YzAuOSwwLDEuNS0wLjksMS41LTJjMC0xLTAuNS0xLjktMS41LTEuOVMxOTUuNywyNywxOTUuNywyOC4xeiIvPg0KCTxwYXRoIGNsYXNzPSJzdDUiIGQ9Ik0yMDguNCwyNS40djQuNWgwLjVsLTAuMSwyLjFoLTAuN2wtMC4xLTEuM2gtMy4ybC0wLjEsMS4zSDIwNHYtMi4xaDAuNGMwLjItMC40LDAuNC0wLjgsMC41LTEuMg0KCQljMC4yLTAuNiwwLjItMS4yLDAuMi0ydi0xLjRoMy4zVjI1LjR6IE0yMDYuMSwyN2MwLDAuNy0wLjEsMS40LTAuMywxLjljLTAuMSwwLjMtMC4zLDAuNy0wLjQsMC45aDJ2LTMuN0gyMDZMMjA2LjEsMjdMMjA2LjEsMjd6Ig0KCQkvPg0KCTxwYXRoIGNsYXNzPSJzdDUiIGQ9Ik0yMTQuNCwyNS40bDAuOSwyLjFjMC4xLDAuMywwLjMsMC43LDAuNCwxbDAsMGMwLjEtMC4yLDAuMi0wLjYsMC4zLTFsMC43LTJoMWwtMSwyLjdjLTAuMywwLjgtMC42LDEuNi0xLDIuMQ0KCQljLTAuMywwLjQtMC44LDAuNy0xLjMsMC43Yy0wLjIsMC0wLjQsMC0wLjUtMC4xbDAuMS0wLjhjMC4xLDAsMC4yLDAsMC4zLDBjMC40LDAsMC43LTAuNCwwLjktMC43YzAtMC4xLDAtMC4yLDAtMC4zbC0xLjgtMy42aDENCgkJVjI1LjR6Ii8+DQoJPHBhdGggY2xhc3M9InN0NSIgZD0iTTIyMy40LDI1LjR2Mi4zaDAuMmwxLjYtMi4zaDEuMmwtMS45LDIuNGMwLjgsMC4xLDEuMSwwLjYsMS4zLDEuM2MwLjIsMC42LDAuNCwxLjEsMC42LDEuNmgtMQ0KCQljLTAuMi0wLjQtMC4zLTAuOC0wLjQtMS4yYy0wLjItMC42LTAuNS0xLjEtMS4yLTEuMWgtMC4ydjIuM2gtMC45di01LjNDMjIyLjcsMjUuNCwyMjMuNCwyNS40LDIyMy40LDI1LjR6Ii8+DQoJPHBhdGggY2xhc3M9InN0NSIgZD0iTTIzMi40LDI2LjJoLTEuNXYtMC44aDR2MC44aC0xLjV2NC41aC0xVjI2LjJ6Ii8+DQoJPHBhdGggY2xhc3M9InN0NSIgZD0iTTI0NC4xLDI4YzAsMS44LTEuMSwyLjgtMi41LDIuOGMtMS41LDAtMi40LTEuMS0yLjQtMi43czEtMi44LDIuNS0yLjhDMjQzLjIsMjUuMywyNDQuMSwyNi41LDI0NC4xLDI4eg0KCQkgTTI0MC4yLDI4LjFjMCwxLjEsMC41LDEuOSwxLjUsMS45YzAuOSwwLDEuNS0wLjksMS41LTJjMC0xLTAuNS0xLjktMS41LTEuOVMyNDAuMiwyNywyNDAuMiwyOC4xeiIvPg0KCTxwYXRoIGNsYXNzPSJzdDUiIGQ9Ik0yNDkuMiwyNS41YzAuMy0wLjEsMC45LTAuMSwxLjQtMC4xYzAuNywwLDEuMiwwLjEsMS41LDAuM2MwLjMsMC4yLDAuNSwwLjUsMC41LDFzLTAuMywwLjktMC45LDEuMWwwLDANCgkJYzAuNiwwLjEsMS4xLDAuNiwxLjEsMS4zYzAsMC41LTAuMiwwLjgtMC41LDEuMWMtMC40LDAuMy0xLDAuNS0yLDAuNWMtMC41LDAtMC45LDAtMS4yLTAuMUwyNDkuMiwyNS41TDI0OS4yLDI1LjV6IE0yNTAuMSwyNy42DQoJCWgwLjVjMC43LDAsMS0wLjMsMS0wLjhzLTAuNC0wLjctMS0wLjdjLTAuMywwLTAuNCwwLTAuNSwwVjI3LjZ6IE0yNTAuMSwzMGMwLjEsMCwwLjMsMCwwLjUsMGMwLjYsMCwxLjItMC4yLDEuMi0wLjkNCgkJYzAtMC42LTAuNS0wLjktMS4yLTAuOWgtMC41VjMweiIvPg0KPC9nPg0KPC9zdmc+DQo=" alt="ЦТР — Центр Топливных Решений" width="340" height="51">
       </a>
+      <h1>Калькулятор доставки топлива</h1>
     </div>
   </header>
   <main>
-    <section class="hero">
-      <div class="wrap">
-        <h1>Калькулятор доставки топлива</h1>
-        <p>Стоимость рейса и цена топлива с доставкой за тонну, килограмм и литр. В полях указаны условные данные для примера.</p>
-      </div>
-    </section>
     <div class="wrap calculator">
       <nav class="section-nav" aria-label="Разделы калькулятора">
-        <a href="#input-heading">Расчёт</a>
-        <a href="#result-heading">Итоги</a>
-        <a href="#quote-panel" id="mobile-quote-link">КП</a>
+        <button type="button" data-view="calculation-view" aria-controls="calculation-view" aria-pressed="true">Расчёт</button>
+        <button type="button" data-view="journal-view" aria-controls="journal-view" aria-pressed="false">Google Таблицы</button>
+        <button type="button" data-view="quote-panel" aria-controls="quote-panel" aria-pressed="false">Коммерческое предложение</button>
       </nav>
-      <div class="panels">
+      <div class="panels" id="calculation-view">
         <section class="panel" aria-labelledby="input-heading">
-          <h2 id="input-heading">Данные для расчёта</h2>
+          <h2 id="input-heading">Параметры расчёта</h2>
+          <p class="hint required-note">Поля со звёздочкой обязательны.</p>
           <form id="calculator" novalidate>
-            <div class="fields">
-              <div class="field field-full">
-                <label for="fuel-type">Вид топлива</label>
-                <select id="fuel-type">
-                  <option value="">Выберите топливо</option>
-                  <optgroup label="Дизельное топливо">
-                    <option>ДТ-Л-К5 — летнее</option>
-                    <option>ДТ сорта C</option>
-                    <option>ДТ сорта E — межсезонное</option>
-                    <option>ДТ сорта F</option>
-                    <option>ДТ-З-К5, класс 0</option>
-                    <option>ДТ-З-К5, класс 1</option>
-                    <option>ДТ-З-К5, класс 2</option>
-                    <option>ДТ-З-32</option>
-                    <option>ДТ-А-К5 — арктическое</option>
-                  </optgroup>
-                  <optgroup label="Бензин">
-                    <option>АИ-92</option>
-                    <option>АИ-95</option>
-                    <option>АИ-98</option>
-                    <option>АИ-100</option>
-                  </optgroup>
-                  <optgroup label="Другие нефтепродукты">
-                    <option>ТС-1 — керосин</option>
-                    <option>Газойль</option>
-                    <option>Мазут</option>
-                    <option>Пропан-бутан</option>
-                  </optgroup>
-                  <option value="custom">Другой вид или марка</option>
-                </select>
-              </div>
-              <div class="field field-full" id="fuel-custom-field" hidden>
-                <label for="fuel-custom">Наименование и марка топлива</label>
-                <input id="fuel-custom" type="text" maxlength="180">
-              </div>
-              <div class="field field-full">
-                <label for="freight-mode">Как посчитать доставку</label>
-                <select id="freight-mode">
-                  <option value="distance">По пробегу и тарифу</option>
-                  <option value="fixed">Готовая сумма за рейс</option>
-                </select>
-              </div>
-              <div id="distance-field" class="field">
-                <label for="distance">Оплачиваемый пробег, км</label>
-                <input id="distance" inputmode="decimal" autocomplete="off" value="100">
-              </div>
-              <div id="rate-field" class="field">
-                <label for="rate">Тариф перевозки, ₽/км</label>
-                <input id="rate" inputmode="decimal" autocomplete="off" value="100">
-              </div>
-              <div id="freight-fixed-field" class="field field-full" hidden>
-                <label for="freight-fixed">Стоимость доставки за рейс, ₽</label>
-                <input id="freight-fixed" inputmode="decimal" autocomplete="off" placeholder="Введите сумму">
-              </div>
-              <div class="field">
-                <label for="quantity">Загрузка машины</label>
-                <div class="with-unit">
-                  <input id="quantity" inputmode="decimal" autocomplete="off" value="20">
-                  <select id="quantity-unit" aria-label="Единица загрузки">
-                    <option value="t">т</option>
-                    <option value="kg">кг</option>
-                    <option value="l">л</option>
-                  </select>
+            <div class="pricing-grid">
+              <section class="input-block" aria-labelledby="purchase-heading">
+                <h3 id="purchase-heading">Закупка и доставка</h3>
+                <div class="fields">
+                  <div class="field field-full">
+                    <label for="fuel-type">Вид топлива</label>
+                    <select id="fuel-type">
+                      <option value="">Выберите топливо</option>
+                      <optgroup label="Дизельное топливо">
+                        <option>ДТ-Л-К5 — летнее</option>
+                        <option>ДТ сорта C</option>
+                        <option>ДТ сорта E — межсезонное</option>
+                        <option>ДТ сорта F</option>
+                        <option>ДТ-З-К5, класс 0</option>
+                        <option>ДТ-З-К5, класс 1</option>
+                        <option>ДТ-З-К5, класс 2</option>
+                        <option>ДТ-З-32</option>
+                        <option>ДТ-А-К5 — арктическое</option>
+                      </optgroup>
+                      <optgroup label="Бензин">
+                        <option>АИ-92</option>
+                        <option>АИ-95</option>
+                        <option>АИ-98</option>
+                        <option>АИ-100</option>
+                      </optgroup>
+                      <optgroup label="Другие нефтепродукты">
+                        <option>ТС-1 — керосин</option>
+                        <option>Газойль</option>
+                        <option>Мазут</option>
+                        <option>Пропан-бутан</option>
+                      </optgroup>
+                      <option value="custom">Другой вид или марка</option>
+                    </select>
+                  </div>
+                  <div class="field field-full" id="fuel-custom-field" hidden>
+                    <label for="fuel-custom">Наименование и марка топлива</label>
+                    <input id="fuel-custom" type="text" maxlength="180">
+                  </div>
+                  <div class="field field-full">
+                    <label for="freight-mode">Как посчитать доставку</label>
+                    <select id="freight-mode">
+                      <option value="fixed">Готовая сумма за рейс</option>
+                      <option value="distance">По пробегу и тарифу</option>
+                    </select>
+                  </div>
+                  <div id="distance-field" class="field" hidden>
+                    <label for="distance">Оплачиваемый пробег, км <span class="required-mark" id="distance-required" aria-hidden="true" hidden>*</span></label>
+                    <input id="distance" inputmode="decimal" autocomplete="off" required>
+                  </div>
+                  <div id="rate-field" class="field" hidden>
+                    <label for="rate">Тариф перевозки, ₽/км <span class="required-mark" id="rate-required" aria-hidden="true" hidden>*</span></label>
+                    <input id="rate" inputmode="decimal" autocomplete="off" required>
+                  </div>
+                  <div id="freight-fixed-field" class="field field-full">
+                    <label for="freight-fixed">Стоимость доставки за рейс, ₽ <span class="required-mark" id="freight-fixed-required" aria-hidden="true" hidden>*</span></label>
+                    <input id="freight-fixed" inputmode="decimal" required autocomplete="off" placeholder="Введите сумму">
+                  </div>
+                  <div class="field">
+                    <label for="quantity">Загрузка машины <span class="required-mark" id="quantity-required" aria-hidden="true" hidden>*</span></label>
+                    <div class="with-unit">
+                      <input id="quantity" inputmode="decimal" autocomplete="off" required>
+                      <select id="quantity-unit" aria-label="Единица загрузки">
+                        <option value="t">т</option>
+                        <option value="kg">кг</option>
+                        <option value="l">л</option>
+                      </select>
+                    </div>
+                  </div>
+                  <div class="field">
+                    <label for="price">Закупочная цена <span class="required-mark" id="price-required" aria-hidden="true" hidden>*</span></label>
+                    <div class="with-unit">
+                      <input id="price" inputmode="decimal" autocomplete="off" required>
+                      <select id="price-unit" aria-label="Единица закупочной цены">
+                        <option value="t">₽/т</option>
+                        <option value="kg">₽/кг</option>
+                        <option value="l">₽/л</option>
+                      </select>
+                    </div>
+                  </div>
+                  <div class="field field-full">
+                    <label for="density">Плотность топлива, кг/л <span class="required-mark" id="density-required" aria-hidden="true" hidden>*</span></label>
+                    <input id="density" inputmode="decimal" autocomplete="off" value="0,840" aria-describedby="density-hint">
+                    <p class="hint" id="density-hint">По умолчанию 0,840 кг/л. При необходимости введите плотность из паспорта партии.</p>
+                  </div>
                 </div>
-              </div>
-              <div class="field">
-                <label for="price">Закупочная цена</label>
-                <div class="with-unit">
-                  <input id="price" inputmode="decimal" autocomplete="off" value="90 000">
-                  <select id="price-unit" aria-label="Единица закупочной цены">
-                    <option value="t">₽/т</option>
-                    <option value="kg">₽/кг</option>
-                    <option value="l">₽/л</option>
-                  </select>
-                </div>
-              </div>
-              <div class="field field-full">
-                <label for="density">Плотность топлива, кг/л</label>
-                <input id="density" inputmode="decimal" autocomplete="off" value="0,840" aria-describedby="density-hint">
-                <p class="hint" id="density-hint">По умолчанию 0,840 кг/л. При необходимости введите плотность из паспорта партии.</p>
-              </div>
-            </div>
-            <fieldset class="credit">
-              <legend>Отсрочка платежа</legend>
-              <div class="fields">
-                <div class="field field-full">
-                  <label for="credit-mode">Как начислять отсрочку</label>
-                  <select id="credit-mode" aria-describedby="credit-hint">
-                    <option value="kg">Дневная ставка за килограмм</option>
-                    <option value="l">Дневная ставка за литр</option>
-                    <option value="t">Дневная ставка за тонну</option>
-                    <option value="trip">Дневная ставка за рейс</option>
-                    <option value="annual">Процент годовых</option>
-                  </select>
-                </div>
-                <div class="field">
-                  <label id="credit-days-label" for="credit-days">Оплачиваемые дни</label>
-                  <input id="credit-days" inputmode="numeric" autocomplete="off" value="0">
-                </div>
-                <div id="credit-kg-field" class="field">
-                  <label for="credit-kg">Ставка, ₽/кг в день</label>
-                  <input id="credit-kg" inputmode="decimal" autocomplete="off">
-                </div>
-                <div id="credit-l-field" class="field" hidden>
-                  <label for="credit-l">Ставка, ₽/л в день</label>
-                  <input id="credit-l" inputmode="decimal" autocomplete="off">
-                </div>
-                <div id="credit-t-field" class="field" hidden>
-                  <label for="credit-t">Ставка, ₽/т в день</label>
-                  <input id="credit-t" inputmode="decimal" autocomplete="off">
-                </div>
-                <div id="credit-trip-field" class="field" hidden>
-                  <label for="credit-trip">Ставка, ₽/рейс в день</label>
-                  <input id="credit-trip" inputmode="decimal" autocomplete="off">
-                </div>
-                <div id="credit-rate-field" class="field" hidden>
-                  <label for="credit-rate">Ставка, % годовых</label>
-                  <input id="credit-rate" inputmode="decimal" autocomplete="off">
-                </div>
-                <div id="credit-base-field" class="field field-full" hidden>
-                  <label for="credit-base">На какую сумму начислять</label>
-                  <select id="credit-base">
-                    <option value="all">Топливо и доставка</option>
-                    <option value="fuel">Только топливо</option>
-                  </select>
-                </div>
-              </div>
-              <p class="hint" id="credit-hint">Если отсрочка указана в рабочих днях, введите число рабочих дней по договору.</p>
-              <div class="quote-actions">
-                <button type="button" id="apply-sheet-terms" aria-describedby="sheet-terms-hint">Подставить ставки из таблицы</button>
-              </div>
-              <p class="hint" id="sheet-terms-hint">Ставка Жени и Наталии — 0,04 ₽ за литр или кг в день. НДС для расчёта прибыли — 22%.</p>
-            </fieldset>
-            <details class="sale">
-              <summary>Маржа и цена для клиента</summary>
-              <div class="fields">
-                <div class="field field-full">
-                  <label for="sale-mode">Как задать цену продажи</label>
-                  <select id="sale-mode" aria-describedby="sale-hint">
-                    <option value="markup">Добавить наценку в рублях за единицу</option>
-                    <option value="price-liter">Указать готовую цену за литр</option>
-                    <option value="price">Указать готовую цену в выбранной единице</option>
-                    <option value="margin">Задать маржу в процентах от цены продажи</option>
-                  </select>
-                  <p class="hint" id="sale-hint">Цена включает доставку. Стоимость отсрочки прибавляется отдельно.</p>
-                  <p class="hint">Маржа в процентах показывает, какую долю цены продажи составляет разница между ценой и себестоимостью с доставкой. Например, при себестоимости 90 ₽/л и цене продажи 100 ₽/л маржа составляет 10%.</p>
-                </div>
-                <div id="sale-unit-field" class="field">
-                  <label id="sale-input-label" for="sale-price">Цена продажи без отсрочки</label>
-                  <div class="with-unit">
-                    <input id="sale-price" inputmode="decimal" autocomplete="off">
-                    <input id="markup-value" inputmode="decimal" autocomplete="off" hidden>
-                    <select id="sale-unit" aria-label="Единица цены продажи">
+              </section>
+              <section class="input-block sale" aria-labelledby="pricing-heading">
+                <h3 id="pricing-heading">Цена для клиента</h3>
+                <div class="fields">
+                  <div class="field field-full">
+                    <label for="sale-mode">Как задать цену продажи</label>
+                    <select id="sale-mode" aria-describedby="sale-hint">
+                      <option value="markup">Добавить наценку в рублях за единицу</option>
+                      <option value="price-liter">Указать готовую цену за литр</option>
+                      <option value="price">Указать готовую цену в выбранной единице</option>
+                      <option value="margin">Задать маржу в процентах от цены продажи</option>
+                    </select>
+                    <p class="hint" id="sale-hint">Цена включает доставку. Стоимость отсрочки прибавляется отдельно.</p>
+                  </div>
+                  <div id="sale-unit-field" class="field field-full">
+                    <label for="sale-unit">Единица цены и наценки</label>
+                    <select id="sale-unit">
                       <option value="t">₽/т</option>
                       <option value="kg">₽/кг</option>
                       <option value="l">₽/л</option>
                     </select>
                   </div>
+                  <div id="linked-prices" class="fields field-full">
+                    <div class="field">
+                      <label for="markup-value">Наценка за единицу <span class="required-mark" id="markup-value-required" aria-hidden="true" hidden>*</span></label>
+                      <input id="markup-value" inputmode="decimal" autocomplete="off">
+                    </div>
+                    <div class="field">
+                      <label for="sale-price">Цена без отсрочки <span class="required-mark" id="sale-price-required" aria-hidden="true" hidden>*</span></label>
+                      <input id="sale-price" inputmode="decimal" autocomplete="off">
+                    </div>
+                  </div>
+                  <div id="sale-price-liter-field" class="field" hidden>
+                    <label for="sale-price-liter">Цена с доставкой без отсрочки, ₽/л <span class="required-mark" id="sale-price-liter-required" aria-hidden="true" hidden>*</span></label>
+                    <input id="sale-price-liter" inputmode="decimal" autocomplete="off">
+                  </div>
+                  <div id="margin-percent-field" class="field" hidden>
+                    <label for="margin-percent">Маржа от цены продажи, % <span class="required-mark" id="margin-percent-required" aria-hidden="true" hidden>*</span></label>
+                    <input id="margin-percent" inputmode="decimal" autocomplete="off">
+                  </div>
                 </div>
-                <div id="sale-price-liter-field" class="field" hidden>
-                  <label for="sale-price-liter">Цена с доставкой без отсрочки, ₽/л</label>
-                  <input id="sale-price-liter" inputmode="decimal" autocomplete="off">
-                </div>
-                <div id="margin-percent-field" class="field" hidden>
-                  <label for="margin-percent">Маржа от цены продажи, %</label>
-                  <input id="margin-percent" inputmode="decimal" autocomplete="off">
-                </div>
-                <div class="field">
-                  <label for="vat-rate">НДС в суммах, %</label>
-                  <input id="vat-rate" inputmode="decimal" autocomplete="off" aria-describedby="vat-hint" value="0">
-                </div>
-              </div>
-              <p class="hint" id="vat-hint">Укажите общую ставку, если продажа и все расходы включают одинаковый НДС. Для сумм без НДС оставьте 0.</p>
-            </details>
-            <p id="error" class="error" role="alert" hidden></p>
+                <details class="credit">
+                  <summary>Отсрочка и НДС</summary>
+                  <div class="fields">
+                    <div class="field field-full">
+                      <label for="credit-mode">Как начислять отсрочку</label>
+                      <select id="credit-mode" aria-describedby="credit-hint">
+                        <option value="kg">Дневная ставка за килограмм</option>
+                        <option value="l">Дневная ставка за литр</option>
+                        <option value="t">Дневная ставка за тонну</option>
+                        <option value="trip">Дневная ставка за рейс</option>
+                        <option value="annual">Процент годовых</option>
+                      </select>
+                    </div>
+                    <div class="field">
+                      <label id="credit-days-label" for="credit-days">Оплачиваемые дни</label>
+                      <input id="credit-days" inputmode="numeric" autocomplete="off" value="0">
+                    </div>
+                    <div id="credit-kg-field" class="field">
+                      <label for="credit-kg">Ставка, ₽/кг в день <span class="required-mark" id="credit-kg-required" aria-hidden="true" hidden>*</span></label>
+                      <input id="credit-kg" inputmode="decimal" autocomplete="off">
+                    </div>
+                    <div id="credit-l-field" class="field" hidden>
+                      <label for="credit-l">Ставка, ₽/л в день <span class="required-mark" id="credit-l-required" aria-hidden="true" hidden>*</span></label>
+                      <input id="credit-l" inputmode="decimal" autocomplete="off">
+                    </div>
+                    <div id="credit-t-field" class="field" hidden>
+                      <label for="credit-t">Ставка, ₽/т в день <span class="required-mark" id="credit-t-required" aria-hidden="true" hidden>*</span></label>
+                      <input id="credit-t" inputmode="decimal" autocomplete="off">
+                    </div>
+                    <div id="credit-trip-field" class="field" hidden>
+                      <label for="credit-trip">Ставка, ₽/рейс в день <span class="required-mark" id="credit-trip-required" aria-hidden="true" hidden>*</span></label>
+                      <input id="credit-trip" inputmode="decimal" autocomplete="off">
+                    </div>
+                    <div id="credit-rate-field" class="field" hidden>
+                      <label for="credit-rate">Ставка, % годовых <span class="required-mark" id="credit-rate-required" aria-hidden="true" hidden>*</span></label>
+                      <input id="credit-rate" inputmode="decimal" autocomplete="off">
+                    </div>
+                    <div id="credit-base-field" class="field field-full" hidden>
+                      <label for="credit-base">На какую сумму начислять</label>
+                      <select id="credit-base">
+                        <option value="all">Топливо и доставка</option>
+                        <option value="fuel">Только топливо</option>
+                      </select>
+                    </div>
+                    <div class="field">
+                      <label for="vat-rate">НДС в суммах, %</label>
+                      <input id="vat-rate" inputmode="decimal" autocomplete="off" aria-describedby="vat-hint" value="22">
+                    </div>
+                  </div>
+                  <p class="hint" id="vat-hint">Укажите общую ставку, если продажа и все расходы включают одинаковый НДС. Для сумм без НДС оставьте 0.</p>
+                  <p class="hint" id="credit-hint">Если отсрочка указана в рабочих днях, введите число рабочих дней по договору.</p>
+                  <div class="quote-actions">
+                    <button type="button" id="apply-sheet-terms" aria-describedby="sheet-terms-hint">Подставить ставки из таблицы</button>
+                  </div>
+                  <p class="hint" id="sheet-terms-hint">Ставка Жени и Наталии — 0,04 ₽ за литр или кг в день. НДС для расчёта прибыли — 22%.</p>
+                </details>
+              </section>
+            </div>
+            <p id="error" class="error" role="status" hidden></p>
             <div class="quote-actions">
               <button type="button" id="save-parameters" aria-describedby="parameters-hint">Сохранить параметры</button>
+              <a class="results-jump" href="#result-heading">К итогам</a>
             </div>
             <p class="hint" id="parameters-hint">Данные расчёта и КП сохраняются в этом браузере.</p>
             <p class="hint" id="parameters-status" role="status"></p>
           </form>
         </section>
         <section class="panel" aria-labelledby="result-heading">
-          <h2 id="result-heading">Стоимость поставки</h2>
-          <div aria-live="polite" aria-atomic="true">
+          <h2 id="result-heading">Итоги расчёта</h2>
+          <p id="result-empty" class="result-empty" role="status">Заполните обязательные поля, чтобы увидеть цену и прибыль.</p>
+          <div id="result-content" hidden>
             <dl class="summary">
-              <dt>Себестоимость рейса с отсрочкой</dt>
-              <dd id="total">—</dd>
+              <div><dt>Цена клиенту за рейс с отсрочкой</dt><dd id="sale-total">—</dd></div>
+              <div><dt>Себестоимость с отсрочкой</dt><dd id="total">—</dd></div>
             </dl>
-            <dl class="breakdown">
-              <div><dt>Топливо</dt><dd id="fuel">—</dd></div>
-              <div><dt>Доставка за рейс</dt><dd id="freight">—</dd></div>
-              <div><dt>Себестоимость без отсрочки</dt><dd id="subtotal">—</dd></div>
-              <div><dt>Стоимость отсрочки</dt><dd id="credit-cost">—</dd></div>
+            <dl class="key-metrics" aria-label="Показатели сделки">
+              <div><dt>МАРЖА НА 1 л (кг)</dt><dd id="sheet-margin-per-l">—</dd><dd id="sheet-margin-per-kg">—</dd></div>
+              <div><dt>% Маржи</dt><dd id="sheet-margin-percent">—</dd></div>
+              <div><dt>ПРИБЫЛЬ</dt><dd id="sale-profit">—</dd><dd class="metric-note">за рейс без НДС</dd></div>
             </dl>
-            <table>
-              <thead><tr><th scope="col">Ед.</th><th scope="col">Доставка</th><th scope="col">Без отсрочки</th><th scope="col">С отсрочкой</th></tr></thead>
-              <tbody>
-                <tr><th scope="row">₽/т</th><td id="freight-t">—</td><td id="subtotal-t">—</td><td id="total-t">—</td></tr>
-                <tr><th scope="row">₽/кг</th><td id="freight-kg">—</td><td id="subtotal-kg">—</td><td id="total-kg">—</td></tr>
-                <tr><th scope="row">₽/л</th><td id="freight-l">—</td><td id="subtotal-l">—</td><td id="total-l">—</td></tr>
-              </tbody>
-            </table>
-            <p id="conversion-note" class="hint"></p>
-            <section id="sale-results" class="sale-results" hidden aria-labelledby="sale-heading">
-              <h3 id="sale-heading">Цена для клиента и прибыль</h3>
+            <details class="metric-help">
+              <summary>Как считаются маржа и прибыль</summary>
+              <p class="hint">Маржа в таблице — разница между ценой продажи с отсрочкой и закупочной ценой. % маржи — доля этой разницы в выручке. Прибыль за рейс учитывает доставку, отсрочку и выбранный НДС.</p>
+            </details>
+            <dl class="cost-strip">
+              <div><dt>Закупка</dt><dd id="fuel">—</dd></div>
+              <div><dt>Доставка</dt><dd id="freight">—</dd></div>
+              <div><dt>Отсрочка</dt><dd id="credit-cost">—</dd></div>
+            </dl>
+            <section id="sale-results" class="sale-results" aria-labelledby="sale-heading">
+              <h3 id="sale-heading">Цена за единицу</h3>
               <table aria-label="Цена продажи и прибыль за единицу">
                 <thead><tr><th scope="col">Ед.</th><th scope="col">Без отсрочки</th><th scope="col">С отсрочкой</th><th scope="col">Прибыль за ед.</th></tr></thead>
                 <tbody>
@@ -429,76 +434,86 @@
                   <tr><th scope="row">₽/т</th><td id="sale-before-t">—</td><td id="sale-after-t">—</td><td id="sale-margin-t">—</td></tr>
                 </tbody>
               </table>
+            </section>
+            <p id="conversion-note" class="hint"></p>
+            <details class="cost-details">
+              <summary>Себестоимость по единицам</summary>
+              <table aria-label="Себестоимость и доставка по единицам">
+                <thead><tr><th scope="col">Ед.</th><th scope="col">Доставка</th><th scope="col">Без отсрочки</th><th scope="col">С отсрочкой</th></tr></thead>
+                <tbody>
+                  <tr><th scope="row">₽/т</th><td id="freight-t">—</td><td id="subtotal-t">—</td><td id="total-t">—</td></tr>
+                  <tr><th scope="row">₽/кг</th><td id="freight-kg">—</td><td id="subtotal-kg">—</td><td id="total-kg">—</td></tr>
+                  <tr><th scope="row">₽/л</th><td id="freight-l">—</td><td id="subtotal-l">—</td><td id="total-l">—</td></tr>
+                </tbody>
+              </table>
               <dl class="breakdown">
-                <div><dt>Сумма продажи без отсрочки</dt><dd id="sale-total-before">—</dd></div>
-                <div><dt>Сумма продажи с отсрочкой</dt><dd id="sale-total">—</dd></div>
-                <div><dt>Прибыль после доставки и отсрочки, без НДС</dt><dd id="sale-profit">—</dd></div>
+                <div><dt>Себестоимость без отсрочки</dt><dd id="subtotal">—</dd></div>
+                <div><dt>Выручка без отсрочки</dt><dd id="sale-total-before">—</dd></div>
                 <div><dt>Маржа после доставки, %</dt><dd id="sale-margin">—</dd></div>
               </dl>
-            </section>
-          </div>
-          <section class="journal" aria-labelledby="journal-title">
-            <h3 id="journal-title">Google Таблицы</h3>
-            <label for="export-template">Лист для вставки</label>
-            <select id="export-template">
-              <option value="roman-shipping">Рома</option>
-              <option value="jenya-shipping">Женя</option>
-              <option value="natalia-shipping">Наталья</option>
-            </select>
-            <div class="fields">
-              <div class="field">
-                <label for="journal-reference">Клиент</label>
-                <input id="journal-reference" type="text" autocomplete="off">
-              </div>
-              <div class="field">
-                <label for="export-supplier">Поставщик или нефтебаза</label>
-                <input id="export-supplier" type="text" autocomplete="off">
-              </div>
-            </div>
-            <div>
-              <div class="fields">
-                <div class="field">
-                  <label for="export-date">Дата</label>
-                  <input id="export-date" type="date">
-                </div>
-                <div class="field" id="export-crm-field" hidden>
-                  <label for="export-crm">Ссылка CRM</label>
-                  <input id="export-crm" type="url" autocomplete="off">
-                </div>
-                <div class="field">
-                  <label for="export-unit">Единица в таблице</label>
-                  <select id="export-unit">
-                    <option value="auto">По загрузке</option>
-                    <option value="l">Литры</option>
-                    <option value="kg">Килограммы</option>
-                  </select>
-                </div>
-              </div>
-              <p class="hint" id="export-hint"></p>
-              <p class="hint" id="export-check"></p>
-            </div>
-            <details class="sheet-preview" id="sheet-preview" hidden>
-              <summary>Предпросмотр строки</summary>
-              <dl class="breakdown">
-                <div><dt>Лист</dt><dd id="sheet-preview-name"></dd></div>
-                <div id="sheet-preview-client-field" hidden><dt>Клиент</dt><dd id="sheet-preview-client"></dd></div>
-                <div><dt>Объём</dt><dd id="sheet-preview-amount">—</dd></div>
-                <div><dt>Отсрочка, дни и сумма</dt><dd id="sheet-preview-credit">—</dd></div>
-                <div><dt>Цена продажи с отсрочкой</dt><dd id="sheet-preview-sale-unit">—</dd></div>
-                <div><dt>Выручка</dt><dd id="sheet-preview-sale-total">—</dd></div>
-                <div><dt>Продажа минус закупка за единицу</dt><dd id="sheet-preview-spread-unit">—</dd></div>
-                <div><dt>Маржа в листе, %</dt><dd id="sheet-preview-margin">—</dd></div>
-                <div><dt>Прибыль в листе без НДС 22%</dt><dd id="sheet-preview-profit">—</dd></div>
-              </dl>
             </details>
-            <button type="button" id="copy-journal">Скопировать строку для Google Таблиц</button>
-            <p class="hint" id="journal-status" role="status">Вставьте строку в колонку A первой свободной строки журнала.</p>
-            <textarea id="journal-row" aria-label="Данные для вставки" rows="2" readonly hidden></textarea>
-          </section>
+          </div>
         </section>
       </div>
-      <details class="panel quote-panel" id="quote-panel">
-        <summary>Коммерческое предложение</summary>
+      <section class="panel journal" id="journal-view" aria-labelledby="journal-title" hidden>
+        <h2 id="journal-title">Google Таблицы</h2>
+        <label for="export-template">Лист для вставки</label>
+        <select id="export-template">
+          <option value="roman-shipping">Рома</option>
+          <option value="jenya-shipping">Женя</option>
+          <option value="natalia-shipping">Наталья</option>
+        </select>
+        <div class="fields">
+          <div class="field">
+            <label for="journal-reference">Клиент</label>
+            <input id="journal-reference" type="text" autocomplete="off">
+          </div>
+          <div class="field">
+            <label for="export-supplier">Поставщик или нефтебаза</label>
+            <input id="export-supplier" type="text" autocomplete="off">
+          </div>
+        </div>
+        <div>
+          <div class="fields">
+            <div class="field">
+              <label for="export-date">Дата</label>
+              <input id="export-date" type="date">
+            </div>
+            <div class="field" id="export-crm-field" hidden>
+              <label for="export-crm">Ссылка CRM</label>
+              <input id="export-crm" type="url" autocomplete="off">
+            </div>
+            <div class="field">
+              <label for="export-unit">Единица в таблице</label>
+              <select id="export-unit">
+                <option value="auto">По загрузке</option>
+                <option value="l">Литры</option>
+                <option value="kg">Килограммы</option>
+              </select>
+            </div>
+          </div>
+          <p class="hint" id="export-hint"></p>
+        </div>
+        <details class="sheet-preview" id="sheet-preview" hidden>
+          <summary>Предпросмотр строки</summary>
+          <dl class="breakdown">
+            <div><dt>Лист</dt><dd id="sheet-preview-name"></dd></div>
+            <div id="sheet-preview-client-field" hidden><dt>Клиент</dt><dd id="sheet-preview-client"></dd></div>
+            <div><dt>Объём</dt><dd id="sheet-preview-amount">—</dd></div>
+            <div><dt>Отсрочка, дни и сумма</dt><dd id="sheet-preview-credit">—</dd></div>
+            <div><dt>Цена продажи с отсрочкой</dt><dd id="sheet-preview-sale-unit">—</dd></div>
+            <div><dt>Выручка</dt><dd id="sheet-preview-sale-total">—</dd></div>
+            <div><dt>Продажа минус закупка за единицу</dt><dd id="sheet-preview-spread-unit">—</dd></div>
+            <div><dt>Маржа в листе, %</dt><dd id="sheet-preview-margin">—</dd></div>
+            <div><dt>Прибыль в листе без НДС</dt><dd id="sheet-preview-profit">—</dd></div>
+          </dl>
+        </details>
+        <button type="button" id="copy-journal">Скопировать строку для Google Таблиц</button>
+        <p class="hint" id="journal-status" role="status">Вставьте строку в колонку A первой свободной строки журнала.</p>
+        <textarea id="journal-row" aria-label="Данные для вставки" rows="2" readonly hidden></textarea>
+      </section>
+      <section class="panel quote-panel" id="quote-panel" aria-labelledby="quote-panel-title" hidden>
+        <h2 id="quote-panel-title">Коммерческое предложение</h2>
         <form id="quote-form" novalidate>
           <div class="fields">
             <div class="field">
@@ -631,7 +646,7 @@
             <p id="quote-bank-out" class="quote-notes" hidden></p>
           </section>
         </article>
-      </details>
+      </section>
     </div>
   </main>
   <script>
@@ -657,9 +672,10 @@
       maximumFractionDigits: 2
     });
 
-    function parseNumber(raw) {
+    function parseNumber(raw, signed = false) {
       const value = raw.trim().replace(/\s/g, '').replace(',', '.');
-      return /^(?:\d+(?:\.\d*)?|\.\d+)$/.test(value) ? Number(value) : NaN;
+      const pattern = signed ? /^-?(?:\d+(?:\.\d*)?|\.\d+)$/ : /^(?:\d+(?:\.\d*)?|\.\d+)$/;
+      return pattern.test(value) ? Number(value) : NaN;
     }
 
     function unitsPerLoad(quantity, quantityUnit, density) {
@@ -683,7 +699,9 @@
       byId('quote-fuel-hint').textContent = fuelName
         ? 'По умолчанию в КП подставляется вид топлива из расчёта.'
         : 'Укажите марку здесь или выберите вид топлива в расчёте.';
-      const inputs = Object.fromEntries(numericFields.map(id => [id, parseNumber(byId(id).value)]));
+
+      const raw = Object.fromEntries(numericFields.map(id => [id, byId(id).value.trim()]));
+      const inputs = Object.fromEntries(numericFields.map(id => [id, parseNumber(raw[id], id === 'markup-value')]));
       const {distance, rate, quantity, price, density} = inputs;
       const quantityUnit = byId('quantity-unit').value;
       const priceUnit = byId('price-unit').value;
@@ -694,8 +712,9 @@
       byId('rate-field').hidden = fixedFreight;
       byId('freight-fixed-field').hidden = !fixedFreight;
       const freight = fixedFreight ? inputs['freight-fixed'] : distance * rate;
-      const fuel = Number.isFinite(price) && quantity > 0 ? load[priceUnit] * price : NaN;
+      const fuel = load[priceUnit] * price;
       const subtotal = freight + fuel;
+
       const creditMode = byId('credit-mode').value;
       const annual = creditMode === 'annual';
       const creditInput = creditInputs[creditMode];
@@ -704,87 +723,132 @@
       byId('credit-days-label').textContent = annual ? 'Календарные дни' : 'Оплачиваемые дни';
       byId('credit-hint').textContent = annual
         ? 'Сумма × ставка / 100 × дни / 365.'
-        : creditMode === 'trip'
-          ? 'Ставка за рейс × оплачиваемые дни.'
-          : 'Ставка × количество × оплачиваемые дни. Если в договоре указаны рабочие дни, введите их количество.';
-      const creditDays = byId('credit-days').value.trim() ? inputs['credit-days'] : 0;
-      const creditRate = byId(creditInput).value.trim() ? inputs[creditInput] : 0;
-      const validCreditDays = Number.isSafeInteger(creditDays);
-      const validCreditRate = Number.isFinite(creditRate) && (!(creditDays > 0) || byId(creditInput).value.trim() !== '');
-      const creditBase = byId('credit-base').value === 'fuel' ? fuel : subtotal;
-      let creditCost = NaN;
-      if (validCreditDays && validCreditRate) {
-        if (creditDays === 0 || creditRate === 0) creditCost = 0;
-        else if (annual) creditCost = creditBase * (creditRate / 100) * (creditDays / 365);
-        else if (quantity > 0) creditCost = (creditMode === 'trip' ? 1 : load[creditMode]) * creditRate * creditDays;
+        : creditMode === 'trip' ? 'Ставка за рейс × оплачиваемые дни.' : 'Ставка × количество × оплачиваемые дни.';
+      const creditDays = raw['credit-days'] ? inputs['credit-days'] : 0;
+      const creditRate = raw[creditInput] ? inputs[creditInput] : 0;
+      const creditFuelOnly = byId('credit-base').value === 'fuel';
+      let creditCost = 0;
+      if (creditDays > 0 && creditRate > 0) {
+        if (annual) creditCost = (creditFuelOnly ? fuel : subtotal) * creditRate * creditDays / 36500;
+        else creditCost = (creditMode === 'trip' ? 1 : load[creditMode]) * creditRate * creditDays;
       }
-      const total = subtotal + creditCost;
 
-      const invalid = new Set();
-      const messages = [];
-      const freightInputs = fixedFreight ? ['freight-fixed'] : ['distance', 'rate'];
-      for (const id of [...freightInputs, 'quantity', 'price']) {
-        if (!Number.isFinite(inputs[id]) || (id === 'quantity' && quantity <= 0)) invalid.add(id);
-      }
-      if (invalid.size) messages.push('Проверьте выделенные поля. Загрузка должна быть больше нуля.');
-      if (!validCreditDays) {
-        invalid.add('credit-days');
-        messages.push('Укажите срок отсрочки целым числом дней.');
-      }
-      if (!validCreditRate) {
-        invalid.add(creditInput);
-        messages.push('Укажите ставку отсрочки. Для беспроцентной отсрочки введите 0.');
-      }
       const saleMode = byId('sale-mode').value;
       const percentMode = saleMode === 'margin';
       const markupMode = saleMode === 'markup';
       const literMode = saleMode === 'price-liter';
+      const linkedPrices = markupMode || saleMode === 'price';
       const saleInput = saleInputs[saleMode];
-      byId('sale-unit-field').hidden = percentMode || literMode;
-      byId('sale-price-liter-field').hidden = !literMode;
-      byId('sale-price').hidden = markupMode;
-      byId('markup-value').hidden = !markupMode;
-      byId('margin-percent-field').hidden = !percentMode;
-      const saleLabel = byId('sale-input-label');
-      saleLabel.htmlFor = markupMode ? 'markup-value' : 'sale-price';
-      saleLabel.textContent = markupMode ? 'Наценка за единицу' : 'Цена продажи без отсрочки';
-      byId('sale-hint').textContent = percentMode
-        ? 'Цена продажи = себестоимость с доставкой ÷ (1 − процент маржи / 100). Отсрочка добавляется отдельно.'
-        : markupMode
-          ? 'Наценка в рублях прибавляется к себестоимости с доставкой за выбранную единицу.'
-          : 'Введите цену с доставкой. Стоимость отсрочки прибавляется отдельно.';
-      const saleEntered = byId(saleInput).value.trim() !== '';
       const saleUnit = literMode ? 'l' : byId('sale-unit').value;
       const saleValue = inputs[saleInput];
-      const validSale = Number.isFinite(saleValue) && (!percentMode || saleValue < 100);
-      const vatRate = byId('vat-rate').value.trim() ? inputs['vat-rate'] : 0;
-      const needsCreditConversion = !annual && creditMode !== 'trip' && creditDays > 0 && creditRate > 0
-        && (quantityUnit === 'l') !== (creditMode === 'l');
-      const needsPurchaseConversion = (quantityUnit === 'l') !== (priceUnit === 'l');
-      const needsSaleConversion = saleEntered && !percentMode && (quantityUnit === 'l') !== (saleUnit === 'l');
-      if (byId('density').value.trim() && !validDensity) {
-        invalid.add('density');
-        messages.push('Укажите плотность больше нуля.');
-      } else if (!validDensity && (needsCreditConversion || needsPurchaseConversion || needsSaleConversion)) {
-        invalid.add('density');
-        messages.push('Для перевода между литрами и массой укажите плотность топлива.');
+      const saleAmount = load[saleUnit];
+      byId('sale-unit-field').hidden = !linkedPrices;
+      byId('linked-prices').hidden = !linkedPrices;
+      byId('sale-price-liter-field').hidden = !literMode;
+      byId('margin-percent-field').hidden = !percentMode;
+      byId('sale-hint').textContent = percentMode
+        ? 'Цена без отсрочки = себестоимость с доставкой ÷ (1 − маржа / 100).'
+        : literMode ? 'Введите цену с доставкой за литр. Отсрочка прибавляется отдельно.'
+          : 'Измените наценку или цену. Второе поле пересчитается автоматически.';
+
+      const vatRate = raw['vat-rate'] ? inputs['vat-rate'] : 0;
+      const required = new Map([['quantity', 'объём'], ['price', 'закупочная цена']]);
+      if (fixedFreight) required.set('freight-fixed', 'стоимость доставки');
+      else {
+        required.set('distance', 'пробег');
+        required.set('rate', 'тариф доставки');
       }
-      if (saleEntered && !validSale) {
+      required.set(saleInput, percentMode ? 'процент маржи' : markupMode ? 'наценка' : 'цена продажи');
+      if (creditDays > 0) required.set(creditInput, 'ставка отсрочки');
+      const converts = unit => (quantityUnit === 'l') !== (unit === 'l');
+      const needsDensity = converts(priceUnit) || (!percentMode && converts(saleUnit))
+        || (creditDays > 0 && creditRate > 0 && !annual && creditMode !== 'trip' && converts(creditMode));
+      if (needsDensity) required.set('density', 'плотность топлива');
+
+      const invalid = new Set([...required.keys()].filter(id => raw[id] && !Number.isFinite(inputs[id])));
+      const messages = [];
+      const blanks = [...required].filter(([id]) => !raw[id]).map(([, label]) => label);
+      if (blanks.length) messages.push('Заполните: ' + blanks.join(', ') + '.');
+      if ((raw.quantity && !(quantity > 0)) || (raw.price && !(price > 0))) {
+        if (!(quantity > 0) && raw.quantity) invalid.add('quantity');
+        if (!(price > 0) && raw.price) invalid.add('price');
+        messages.push('Объём и закупочная цена должны быть больше нуля.');
+      }
+      if (raw.density && !validDensity) {
+        invalid.add('density');
+        messages.push('Плотность должна быть больше нуля.');
+      }
+      if (!Number.isSafeInteger(creditDays)) {
+        invalid.add('credit-days');
+        messages.push('Укажите срок отсрочки целым числом дней.');
+      }
+      if (raw[creditInput] && !Number.isFinite(creditRate)) invalid.add(creditInput);
+      if (!Number.isFinite(vatRate)) invalid.add('vat-rate');
+      if (percentMode && saleValue >= 100) {
         invalid.add(saleInput);
-        messages.push(percentMode ? 'Укажите маржу от 0 до 100%, не включая 100%.' : 'Проверьте введённую цену или маржу.');
+        messages.push('Маржа должна быть меньше 100%.');
       }
-      if (saleEntered && !Number.isFinite(vatRate)) {
-        invalid.add('vat-rate');
-        messages.push('Проверьте ставку НДС.');
+
+      const saleBefore = percentMode ? subtotal / (1 - saleValue / 100)
+        : markupMode ? subtotal + saleValue * saleAmount : saleValue * saleAmount;
+      const saleTotal = saleBefore + creditCost;
+      const total = subtotal + creditCost;
+      if (Number.isFinite(saleBefore) && saleBefore <= 0) {
+        invalid.add(saleInput);
+        messages.push('Цена продажи должна быть больше нуля.');
       }
-      if (!invalid.size && !Number.isFinite(total)) messages.push('Значения слишком велики для расчёта.');
+      if (invalid.size) messages.push('Проверьте выделенные поля.');
+      const ready = !blanks.length && !invalid.size && Number.isFinite(total) && Number.isFinite(saleTotal);
+      if (!ready && !messages.length) messages.push('Проверьте величины для расчёта.');
+
       for (const id of numericFields) {
-        if (invalid.has(id)) byId(id).setAttribute('aria-invalid', 'true');
-        else byId(id).removeAttribute('aria-invalid');
+        const field = byId(id);
+        field.required = required.has(id);
+        const marker = byId(id + '-required');
+        if (marker) marker.hidden = !field.required;
+        if (invalid.has(id)) field.setAttribute('aria-invalid', 'true');
+        else field.removeAttribute('aria-invalid');
       }
       const error = byId('error');
       error.textContent = messages.join(' ');
       error.hidden = !messages.length;
+
+      if (linkedPrices) {
+        const derivedField = byId(markupMode ? 'sale-price' : 'markup-value');
+        const derived = markupMode ? saleBefore / saleAmount : (saleBefore - subtotal) / saleAmount;
+        derivedField.value = ready && Number.isFinite(derived) ? formatter.format(derived) : '';
+      }
+      updateCalculationResults({ready, load, fuel, freight, subtotal, creditCost, saleBefore, saleTotal, total, vatRate, validDensity, quantityUnit});
+
+      sheetValues = {
+        ready, load, quantityUnit, price, priceUnit, density: validDensity ? density : NaN,
+        fuel, freight, creditCost, creditDays, creditMode, creditRate, creditFuelOnly, saleTotal, vatRate
+      };
+      updateSheetExport();
+      quotePrices = {load, quantityUnit, saleBefore: ready ? saleBefore : NaN, saleTotal: ready ? saleTotal : NaN,
+        creditDays, annual, fuelName};
+      byId('quote-days-field').hidden = annual || !(creditDays > 0);
+      updateQuoteUnitLabel();
+      byId('quote-hint').textContent = ready
+        ? 'Итог в КП считается по цене за единицу, округлённой до копеек.'
+        : 'Заполните обязательные поля во вкладке «Расчёт».';
+      if (quoteRequested) updateQuote();
+    }
+
+    function updateCalculationResults({ready, load, fuel, freight, subtotal, creditCost, saleBefore, saleTotal, total, vatRate, validDensity, quantityUnit}) {
+      byId('result-content').hidden = !ready;
+      byId('result-empty').hidden = ready;
+      if (!ready) return;
+      const difference = saleTotal - fuel;
+      const profit = difference - freight - creditCost;
+      const netProfit = profit / (1 + vatRate / 100);
+      showAmount('sheet-margin-per-l', difference / load.l, ' ₽/л');
+      showAmount('sheet-margin-per-kg', difference / load.kg, ' ₽/кг');
+      showAmount('sheet-margin-percent', difference / saleTotal * 100, ' %');
+      showAmount('sale-profit', netProfit, ' ₽');
+      showAmount('sale-total', saleTotal, ' ₽');
+      showAmount('sale-total-before', saleBefore, ' ₽');
+      showAmount('sale-margin', profit / saleBefore * 100, ' %');
       showAmount('freight', freight, ' ₽');
       showAmount('fuel', fuel, ' ₽');
       showAmount('credit-cost', creditCost, ' ₽');
@@ -792,54 +856,16 @@
       showAmount('total', total, ' ₽');
       for (const unit of units) {
         const amount = load[unit];
-        showAmount('freight-' + unit, amount > 0 ? freight / amount : NaN);
-        showAmount('subtotal-' + unit, amount > 0 ? subtotal / amount : NaN);
-        showAmount('total-' + unit, amount > 0 ? total / amount : NaN);
+        showAmount('freight-' + unit, freight / amount);
+        showAmount('subtotal-' + unit, subtotal / amount);
+        showAmount('total-' + unit, total / amount);
+        showAmount('sale-before-' + unit, saleBefore / amount);
+        showAmount('sale-after-' + unit, saleTotal / amount);
+        showAmount('sale-margin-' + unit, netProfit / amount);
       }
-      byId('sale-results').hidden = !saleEntered;
-      const saleAmount = load[saleUnit];
-      let saleBefore = NaN;
-      if (saleEntered && validSale && quantity > 0) {
-        if (percentMode) saleBefore = subtotal / (1 - saleValue / 100);
-        else if (markupMode) saleBefore = subtotal + saleValue * saleAmount;
-        else saleBefore = saleValue * saleAmount;
-      }
-      const saleTotal = saleBefore + creditCost;
-      const profit = saleBefore - subtotal;
-      const netProfit = profit / (1 + vatRate / 100);
-      const margin = saleBefore > 0 ? profit / saleBefore * 100 : NaN;
-      if (saleEntered) {
-        for (const unit of units) {
-          const amount = load[unit] > 0 ? load[unit] : NaN;
-          showAmount('sale-before-' + unit, saleBefore / amount);
-          showAmount('sale-after-' + unit, saleTotal / amount);
-          showAmount('sale-margin-' + unit, profit / amount);
-        }
-        showAmount('sale-total-before', saleBefore, ' ₽');
-        showAmount('sale-total', saleTotal, ' ₽');
-        showAmount('sale-profit', netProfit, ' ₽');
-        showAmount('sale-margin', margin, ' %');
-      }
-      byId('conversion-note').textContent = !validDensity && !invalid.has('density')
-        ? (quantityUnit === 'l'
-          ? 'Для расчёта за тонну и килограмм укажите плотность.'
-          : 'Для расчёта за литр укажите плотность.')
-        : '';
-      sheetValues = {
-        ready: !invalid.size && Number.isFinite(total) && (!saleEntered || Number.isFinite(saleTotal)),
-        load, quantityUnit, price, priceUnit, density: validDensity ? density : NaN,
-        fuel, freight, creditCost, creditDays, creditMode, creditRate,
-        creditFuelOnly: byId('credit-base').value === 'fuel',
-        saleTotal
-      };
-      updateSheetExport();
-      quotePrices = {load, quantityUnit, saleBefore, saleTotal, creditDays, annual, fuelName};
-      byId('quote-days-field').hidden = annual || !(creditDays > 0);
-      updateQuoteUnitLabel();
-      byId('quote-hint').textContent = Number.isFinite(saleBefore)
-        ? 'Итог в КП считается по цене за единицу, округлённой до копеек.'
-        : 'Укажите цену продажи или маржу в разделе «Маржа и цена для клиента».';
-      if (quoteRequested) updateQuote();
+      byId('conversion-note').textContent = validDensity ? '' : quantityUnit === 'l'
+        ? 'Укажите плотность, чтобы пересчитать цену в килограммы и тонны.'
+        : 'Укажите плотность, чтобы пересчитать цену в литры.';
     }
 
     const journalNumber = new Intl.NumberFormat('ru-RU', {useGrouping: false, maximumFractionDigits: 8});
@@ -888,12 +914,10 @@
       const invalidCrm = roman && crm.value.trim() && (!/^https?:\/\//i.test(crm.value.trim()) || !crm.validity.valid);
       byId('copy-journal').disabled = !sheetValues.ready || Boolean(needsDensity || invalidCrm);
       const hint = byId('export-hint');
-      if (!sheetValues.ready) hint.textContent = 'Проверьте исходные данные калькулятора.';
+      if (!sheetValues.ready) hint.textContent = 'Заполните обязательные поля во вкладке «Расчёт».';
       else if (needsDensity) hint.textContent = 'Для выбранной единицы введите плотность топлива.';
       else if (invalidCrm) hint.textContent = 'Укажите полную ссылку CRM, начиная с https://.';
       else hint.textContent = 'Вставьте всю строку с колонки A в свободной строке выбранного листа.';
-      byId('export-check').textContent = Number.isFinite(sheetValues.saleTotal) ? ''
-        : 'Цена продажи останется пустой. Чтобы заполнить её, укажите цену или маржу.';
       updateSheetPreview();
     }
 
@@ -903,7 +927,7 @@
       if (preview.hidden) return;
       const field = byId('export-template');
       const client = byId('journal-reference').value.trim();
-      const {load, fuel, freight, creditCost, creditDays, saleTotal} = sheetValues;
+      const {load, fuel, freight, creditCost, creditDays, saleTotal, vatRate} = sheetValues;
       const unit = sheetUnit();
       const amount = load[unit];
       const unitLabel = unitLabels[unit];
@@ -918,7 +942,7 @@
       showAmount('sheet-preview-sale-total', saleTotal, ' ₽');
       showAmount('sheet-preview-spread-unit', difference / amount, priceSuffix);
       showAmount('sheet-preview-margin', saleTotal > 0 ? difference / saleTotal * 100 : NaN, ' %');
-      showAmount('sheet-preview-profit', (difference - freight - creditCost) / (1 + sheetVatRate / 100), ' ₽');
+      showAmount('sheet-preview-profit', (difference - freight - creditCost) / (1 + vatRate / 100), ' ₽');
     }
 
     function applySheetTerms() {
@@ -932,7 +956,7 @@
 
     function buildSheetRow(template) {
       const roman = template === 'roman-shipping';
-      const {load, fuel, freight, density, creditDays, creditMode, creditRate, creditFuelOnly, saleTotal, price, priceUnit} = sheetValues;
+      const {load, fuel, freight, density, creditDays, creditMode, creditRate, creditFuelOnly, saleTotal, price, priceUnit, vatRate} = sheetValues;
       const unit = sheetUnit();
       const liters = unit === 'l';
       const amount = load[unit];
@@ -984,7 +1008,7 @@
       const difference = '(' + num('Q') + '-' + num('J') + ')';
       formula('R', 'IF(' + totals + ';' + difference + '/' + quantity + ';"")');
       formula('S', 'IF(AND(' + totals + ';' + num('Q') + '<>0);' + difference + '/' + num('Q') + ';"")');
-      formula('T', 'IF(' + totals + ';(' + difference + '-' + num('K') + '-' + num('N') + ')*100/' + (100 + sheetVatRate) + ';"")');
+      formula('T', 'IF(' + totals + ';(' + difference + '-' + num('K') + '-' + num('N') + ')*100/' + journalNumber.format(100 + vatRate) + ';"")');
       if (roman) put('W', byId('export-crm').value);
       return row.join('\t');
     }
@@ -1033,7 +1057,7 @@
       const fuel = byId('quote-fuel').value.trim() || fuelName;
       const deferred = creditDays > 0;
       let error = '';
-      if (!Number.isFinite(saleBefore)) error = 'Укажите цену продажи или маржу и проверьте данные расчёта.';
+      if (!Number.isFinite(saleBefore)) error = 'Заполните обязательные поля во вкладке «Расчёт».';
       else if (!Number.isFinite(saleTotal)) error = 'Проверьте ставку и срок отсрочки.';
       else if (!(volume > 0)) error = 'Укажите плотность для пересчёта или выберите единицу загрузки.';
       else if (twoVolumes && (!Number.isFinite(alternate) || alternate <= 0 || alternate === volume)) {
@@ -1103,7 +1127,21 @@
       if (updateQuote()) byId('quote-sheet').scrollIntoView({block: 'nearest'});
     }
 
+    const viewButtons = [...document.querySelectorAll('.section-nav button')];
+    for (const button of viewButtons) {
+      button.addEventListener('click', () => {
+        for (const option of viewButtons) {
+          const active = option === button;
+          option.setAttribute('aria-pressed', String(active));
+          byId(option.dataset.view).hidden = !active;
+        }
+      });
+    }
+
     const form = byId('calculator');
+    for (const [id, source] of [['markup-value', 'markup'], ['sale-price', 'price']]) {
+      byId(id).addEventListener('input', () => { byId('sale-mode').value = source; });
+    }
     form.addEventListener('submit', event => event.preventDefault());
     form.addEventListener('input', calculate);
     form.addEventListener('change', calculate);
@@ -1124,7 +1162,6 @@
     quoteForm.addEventListener('input', refreshQuoteForm);
     quoteForm.addEventListener('change', refreshQuoteForm);
     byId('quote-preview-button').addEventListener('click', previewQuote);
-    byId('mobile-quote-link').addEventListener('click', () => { byId('quote-panel').open = true; });
     byId('quote-print').addEventListener('click', () => { if (updateQuote()) window.print(); });
 
     const parametersKey = 'centr-fuel-delivery-calculator:parameters:v1';
