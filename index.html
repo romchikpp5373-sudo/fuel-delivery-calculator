@@ -348,7 +348,8 @@
                   <label for="sale-mode">Как задать цену продажи</label>
                   <select id="sale-mode" aria-describedby="sale-hint">
                     <option value="markup">Добавить наценку в рублях за единицу</option>
-                    <option value="price">Указать готовую цену</option>
+                    <option value="price-liter">Указать готовую цену за литр</option>
+                    <option value="price">Указать готовую цену в выбранной единице</option>
                     <option value="margin">Задать маржу в процентах от цены продажи</option>
                   </select>
                   <p class="hint" id="sale-hint">Цена включает доставку. Стоимость отсрочки прибавляется отдельно.</p>
@@ -365,6 +366,10 @@
                       <option value="l">₽/л</option>
                     </select>
                   </div>
+                </div>
+                <div id="sale-price-liter-field" class="field" hidden>
+                  <label for="sale-price-liter">Цена с доставкой без отсрочки, ₽/л</label>
+                  <input id="sale-price-liter" inputmode="decimal" autocomplete="off">
                 </div>
                 <div id="margin-percent-field" class="field" hidden>
                   <label for="margin-percent">Маржа от цены продажи, %</label>
@@ -614,9 +619,12 @@
     const units = ['t', 'kg', 'l'];
     const unitLabels = {t: 'т', kg: 'кг', l: 'л'};
     const creditInputs = {kg: 'credit-kg', l: 'credit-l', t: 'credit-t', trip: 'credit-trip', annual: 'credit-rate'};
+    const saleInputs = {
+      markup: 'markup-value', 'price-liter': 'sale-price-liter', price: 'sale-price', margin: 'margin-percent'
+    };
     const numericFields = [
       'distance', 'rate', 'freight-fixed', 'quantity', 'price', 'density',
-      'credit-days', ...Object.values(creditInputs), 'sale-price', 'markup-value', 'margin-percent', 'vat-rate'
+      'credit-days', ...Object.values(creditInputs), ...Object.values(saleInputs), 'vat-rate'
     ];
     let sheetValues;
     let quotePrices;
@@ -707,13 +715,15 @@
       const saleMode = byId('sale-mode').value;
       const percentMode = saleMode === 'margin';
       const markupMode = saleMode === 'markup';
-      const saleInput = percentMode ? 'margin-percent' : markupMode ? 'markup-value' : 'sale-price';
-      byId('sale-unit-field').hidden = percentMode;
+      const literMode = saleMode === 'price-liter';
+      const saleInput = saleInputs[saleMode];
+      byId('sale-unit-field').hidden = percentMode || literMode;
+      byId('sale-price-liter-field').hidden = !literMode;
       byId('sale-price').hidden = markupMode;
       byId('markup-value').hidden = !markupMode;
       byId('margin-percent-field').hidden = !percentMode;
       const saleLabel = byId('sale-input-label');
-      saleLabel.htmlFor = saleInput;
+      saleLabel.htmlFor = markupMode ? 'markup-value' : 'sale-price';
       saleLabel.textContent = markupMode ? 'Наценка за единицу' : 'Цена продажи без отсрочки';
       byId('sale-hint').textContent = percentMode
         ? 'Цена продажи = себестоимость с доставкой ÷ (1 − процент маржи / 100). Отсрочка добавляется отдельно.'
@@ -721,7 +731,7 @@
           ? 'Наценка в рублях прибавляется к себестоимости с доставкой за выбранную единицу.'
           : 'Введите цену с доставкой. Стоимость отсрочки прибавляется отдельно.';
       const saleEntered = byId(saleInput).value.trim() !== '';
-      const saleUnit = byId('sale-unit').value;
+      const saleUnit = literMode ? 'l' : byId('sale-unit').value;
       const saleValue = inputs[saleInput];
       const validSale = Number.isFinite(saleValue) && (!percentMode || saleValue < 100);
       const vatRate = byId('vat-rate').value.trim() ? inputs['vat-rate'] : 0;
