@@ -187,6 +187,27 @@
       .quote-sheet table th, .quote-sheet table td { padding-inline: 4px; }
     }
   .quick{display:flex;justify-content:space-between;gap:10px;background:#243428;color:white;padding:14px;border-radius:8px;margin-bottom:10px}.quick strong{font-size:15px}@media screen and (max-width:620px){body:has(#calculation-view:not([hidden])) .quick{position:fixed;bottom:0;left:0;right:0;z-index:5;border-radius:0;padding-bottom:max(12px,env(safe-area-inset-bottom))}body{padding-bottom:65px}}
+@media screen {
+:root {--paper:#f4f3ee;--line:#deded4;--ink:#232e29;--gold:#ab883d}
+.top {border-bottom:1px solid var(--line);box-shadow:inset 0 3px #ae904e}
+h1,h2 {letter-spacing:-.035em}
+.section-nav {background:#e6e7df;border-radius:12px;padding:4px;width:fit-content;max-width:100%}
+.section-nav button {background:transparent;border-color:transparent;border-radius:9px}
+.section-nav button[aria-pressed="true"] {background:#263c32;border-color:#263c32}
+.panel {border:1px solid var(--line);border-radius:15px;box-shadow:0 3px 13px #26352509}
+#price-picker {margin-bottom:12px;border:1px solid #d8c997;background:#fcf8eb;border-radius:9px;padding:9px 12px}
+#price-picker summary {cursor:pointer;font-weight:700;color:#604b1a}
+#price-picker[open] label {margin-top:9px}
+#price-picker select {display:block;width:100%;margin-top:4px}
+#pick-info {margin:8px 0;font-variant-numeric:tabular-nums}
+#pick-use {padding:8px 12px;border:0;border-radius:7px;background:#263c32;color:white;cursor:pointer}
+#pick-use:disabled {opacity:.55}
+.quick {background:#263c32;border-radius:10px;align-items:center}
+.quick strong:first-child {font-size:clamp(16px,1.6vw,24px);color:#fff0c5}
+.quick strong:last-child {text-align:right}
+input:focus-visible,select:focus-visible,textarea:focus-visible,button:focus-visible,summary:focus-visible {outline:2px solid #927431;outline-offset:2px}
+@media(max-width:620px){.section-nav{width:100%}.panel{border-radius:11px}.quick{border-radius:0}}
+}
 </style>
 </head>
 <body>
