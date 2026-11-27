@@ -451,12 +451,14 @@ input:focus-visible,select:focus-visible,textarea:focus-visible,button:focus-vis
             </dl>
             <section id="sale-results" class="sale-results" aria-labelledby="sale-heading">
               <h3 id="sale-heading">Цена за единицу</h3>
+              <dl class="breakdown"><div><dt>Стоимость для клиента без доставки, за партию</dt><dd id="pickup-total">—</dd></div></dl>
+              <p class="hint">Без доставки — цена продажи при предоплате за вычетом стоимости рейса. Наценка в рублях сохраняется.</p>
               <table aria-label="Цена продажи и прибыль за единицу">
-                <thead><tr><th scope="col">Ед.</th><th scope="col">Без отсрочки</th><th scope="col">С отсрочкой</th><th scope="col">Прибыль за ед.</th></tr></thead>
+                <thead><tr><th scope="col">Ед.</th><th scope="col">Без доставки</th><th scope="col">С доставкой без отсрочки</th><th scope="col">С отсрочкой</th><th scope="col">Прибыль за ед.</th></tr></thead>
                 <tbody>
-                  <tr><th scope="row">₽/л</th><td id="sale-before-l">—</td><td id="sale-after-l">—</td><td id="sale-margin-l">—</td></tr>
-                  <tr><th scope="row">₽/кг</th><td id="sale-before-kg">—</td><td id="sale-after-kg">—</td><td id="sale-margin-kg">—</td></tr>
-                  <tr><th scope="row">₽/т</th><td id="sale-before-t">—</td><td id="sale-after-t">—</td><td id="sale-margin-t">—</td></tr>
+                  <tr><th scope="row">₽/л</th><td id="pickup-l">—</td><td id="sale-before-l">—</td><td id="sale-after-l">—</td><td id="sale-margin-l">—</td></tr>
+                  <tr><th scope="row">₽/кг</th><td id="pickup-kg">—</td><td id="sale-before-kg">—</td><td id="sale-after-kg">—</td><td id="sale-margin-kg">—</td></tr>
+                  <tr><th scope="row">₽/т</th><td id="pickup-t">—</td><td id="sale-before-t">—</td><td id="sale-after-t">—</td><td id="sale-margin-t">—</td></tr>
                 </tbody>
               </table>
             </section>
@@ -877,6 +879,8 @@ input:focus-visible,select:focus-visible,textarea:focus-visible,button:focus-vis
       byId('quick-price').textContent = Number.isFinite(saleTotal/load.l) ? formatter.format(saleTotal/load.l)+' ₽/л клиенту' : formatter.format(saleTotal/load.kg)+' ₽/кг клиенту';
       byId('quick-profit').textContent = formatter.format(netProfit)+' ₽ прибыли';
       showAmount('sale-profit', netProfit, ' ₽');
+      const pickupTotal = saleBefore - freight;
+      showAmount('pickup-total', pickupTotal, ' ₽');
       showAmount('sale-total', saleTotal, ' ₽');
       showAmount('sale-total-before', saleBefore, ' ₽');
       showAmount('sale-margin', profit / saleBefore * 100, ' %');
@@ -891,6 +895,7 @@ input:focus-visible,select:focus-visible,textarea:focus-visible,button:focus-vis
         showAmount('subtotal-' + unit, subtotal / amount);
         showAmount('total-' + unit, total / amount);
         showAmount('sale-before-' + unit, saleBefore / amount);
+        showAmount('pickup-' + unit, pickupTotal / amount);
         showAmount('sale-after-' + unit, saleTotal / amount);
         showAmount('sale-margin-' + unit, netProfit / amount);
       }
